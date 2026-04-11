@@ -1,7 +1,7 @@
 """
 db_creation.py
 --------------
-Reads the SQL statements from db_creation_queries.txt and executes them
+Reads the SQL statements from schema.sql and executes them
 against the SQLite database defined in db_access.py.
 
 Usage:
@@ -16,7 +16,7 @@ import sqlite3
 # Resolve paths relative to this script's directory
 _DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(_DIR, "hcbs.db")
-QUERIES_PATH = os.path.join(_DIR, "db_creation_queries.txt")
+QUERIES_PATH = os.path.join(_DIR, "schema.sql")
 
 
 def read_queries(path: str) -> str:
@@ -27,7 +27,7 @@ def read_queries(path: str) -> str:
 
 def create_database(force: bool = False) -> None:
     """
-    Create every table defined in db_creation_queries.txt.
+    Create every table defined in schema.sql.
 
     Parameters
     ----------
