@@ -1,14 +1,50 @@
 import pytest
+import os
+import sqlite3
+import tempfile
 from db import db_access
 
-def test_get_user_by_username():
+@pytest.fixture(autouse=True)
+def setup_db(tmp_path, monkeypatch):
+    # Create a temporary directory and file for the database
+    db_path = tmp_path / "test_hcbs.db"
+    monkeypatch.setattr(db_access, "DB_PATH", str(db_path))
+    
+    # Initialize the database with schema
+    schema_path = os.path.join(os.path.dirname(__file__), "..", "db", "schema.sql")
+    with open(schema_path, "r") as f:
+        schema_sql = f.read()
+    
+    with sqlite3.connect(str(db_path)) as conn:
+        conn.executescript(schema_sql)
+    
+    yield
+    # No need to manually delete, tmp_path handles it
+
+def test_add_and_get_user():
+    user_id = db_access.add_user("testuser", "hash", "test@example.com", "admin")
+    assert user_id > 0
+    
     user = db_access.get_user_by_username("testuser")
     assert user is not None
     assert user["username"] == "testuser"
     assert user["role"] == "admin"
+    assert user["is_active"] == 1
 
     non_existent = db_access.get_user_by_username("nobody")
     assert non_existent is None
+
+def test_deactivate_user():
+    user_id = db_access.add_user("active_user", "hash", "active@example.com", "staff")
+    db_access.deactivate_user(user_id)
+    
+    user = db_access.get_user_by_username("active_user")
+    assert user is None # get_user_by_username filters by is_active=1
+
+def test_add_roles():
+    user_id = db_access.add_user("manager_user", "hash", "m@example.com", "manager")
+    db_access.add_manager(user_id)
+    # No error means success for now, as these are simple inserts
 
 def test_add_and_get_city():
     city_id = db_access.add_city("Test City")
@@ -41,62 +77,99 @@ def test_screen_and_seats():
     vip_seats = db_access.get_seats_for_screen(screen_id, seat_type="vip")
     assert len(vip_seats) == 1
     assert vip_seats[0]["seat_number"] == "V1"
+    
+    screens = db_access.get_screens_for_cinema(cinema_id)
+    assert len(screens) == 1
+    assert screens[0]["screen_number"] == 1
 
-def test_film_and_listing():
-    film_id = db_access.add_film("Test Movie", "A test movie", "Action", "PG-13", 120, "Actor A, Actor B")
+def test_get_all_films():
+    db_access.add_film("F1", "...", "...", "...", 100, "...")
+    db_access.add_film("F2", "...", "...", "...", 110, "...")
+    films = db_access.get_all_films()
+    assert len(films) == 2
+
+def test_film_crud():
+    film_id = db_access.add_film("Original Title", "Desc", "Action", "PG", 100, "Actors")
     assert film_id > 0
     
-    city_id = db_access.add_city("Listing City")
-    cinema_id = db_access.add_cinema("Listing Cinema", city_id, "789 Test St")
-    screen_id = db_access.add_screen(cinema_id, 1, 100, 50, 50)
+    film = db_access.get_film_by_id(film_id)
+    assert film["title"] == "Original Title"
     
-    listing_id = db_access.add_listing(film_id, screen_id, "2026-06-01", "19:00", "Evening", 1)
+    db_access.update_film(film_id, title="Updated Title", duration_mins=110)
+    
+    updated_film = db_access.get_film_by_id(film_id)
+    assert updated_film["title"] == "Updated Title"
+    assert updated_film["duration_mins"] == 110
+
+def test_listing_crud():
+    # Setup
+    film_id = db_access.add_film("Movie", "...", "...", "...", 120, "...")
+    city_id = db_access.add_city("L City")
+    cinema_id = db_access.add_cinema("L Cinema", city_id, "...")
+    screen_id = db_access.add_screen(cinema_id, 1, 100, 50, 50)
+    user_id = db_access.add_user("admin_u", "h", "a@e.com", "admin")
+    
+    listing_id = db_access.add_listing(film_id, screen_id, "2026-06-01", "19:00", "Evening", user_id)
     assert listing_id > 0
     
-    listings = db_access.get_listings_for_cinema(cinema_id)
-    assert len(listings) == 1
-    assert listings[0]["title"] == "Test Movie"
+    listing = db_access.get_listing_by_id(listing_id)
+    assert listing["show_time"] == "19:00"
+    
+    db_access.update_listing(listing_id, show_time="20:00", is_active=0)
+    updated = db_access.get_listing_by_id(listing_id)
+    assert updated["show_time"] == "20:00"
+    assert updated["is_active"] == 0
 
 def test_booking_and_cancellation():
-    # Setup: film, city, cinema, screen, seat, listing
-    film_id = db_access.add_film("Booking Movie", "...", "Drama", "U", 90, "...")
-    city_id = db_access.add_city("Booking City")
-    cinema_id = db_access.add_cinema("Booking Cinema", city_id, "...")
+    # Setup
+    film_id = db_access.add_film("B Movie", "...", "Drama", "U", 90, "...")
+    city_id = db_access.add_city("B City")
+    cinema_id = db_access.add_cinema("B Cinema", city_id, "...")
     screen_id = db_access.add_screen(cinema_id, 1, 50, 25, 25)
+    user_id = db_access.add_user("staff_u", "h", "s@e.com", "staff")
     db_access.add_seats_bulk(screen_id, [("S1", "lower")])
     seat_id = db_access.get_seats_for_screen(screen_id)[0]["seat_id"]
-    listing_id = db_access.add_listing(film_id, screen_id, "2026-07-01", "20:00", "Evening", 1)
+    listing_id = db_access.add_listing(film_id, screen_id, "2026-07-01", "20:00", "Evening", user_id)
     
     # Create booking
     booking_ref = db_access.generate_booking_ref()
     booking_id = db_access.create_full_booking(
-        booking_ref, listing_id, 1, 1, 10.0, [(seat_id, "lower", 10.0)]
+        booking_ref, listing_id, user_id, 1, 10.0, [(seat_id, "lower", 10.0)]
     )
     assert booking_id > 0
     
-    # Verify booking
-    booking = db_access.get_booking_by_ref(booking_ref)
-    assert booking["status"] == "confirmed"
-    
-    booked_seats = db_access.get_booked_seats_for_booking(booking_id)
-    assert len(booked_seats) == 1
-    assert booked_seats[0]["seat_id"] == seat_id
+    # Verify seat is booked
+    booked_seat_ids = db_access.get_booked_seat_ids_for_listing(listing_id)
+    assert seat_id in booked_seat_ids
     
     # Cancel booking
-    db_access.cancel_booking_with_record(booking_id, 1, 5.0)
+    db_access.cancel_booking_with_record(booking_id, user_id, 5.0)
     
     booking_after = db_access.get_booking_by_ref(booking_ref)
     assert booking_after["status"] == "cancelled"
+    
+    # Verify reports run
+    db_access.report_bookings_per_listing(cinema_id)
+    db_access.report_monthly_revenue(cinema_id, "2026-07")
+    db_access.report_staff_bookings(cinema_id, "2026-07")
+
+def test_pricing_rules():
+    city_id = db_access.get_all_cities()[0]["city_id"] # Use seed data
+    rule = db_access.get_pricing_rule(city_id, "Morning")
+    assert rule is not None
+    
+    db_access.update_pricing_rule(rule["pricing_id"], base_price=15.0)
+    updated = db_access.get_pricing_rule(city_id, "Morning")
+    assert updated["base_price"] == 15.0
 
 def test_reports():
-    # This just ensures the queries run without error
-    city_id = db_access.add_city("Report City")
-    cinema_id = db_access.add_cinema("Report Cinema", city_id, "...")
+    user_id = db_access.add_user("reporter", "h", "r@e.com", "admin")
+    report_id = db_access.save_report("revenue", user_id, '{"revenue": 1000}')
+    assert report_id > 0
     
-    # Should not raise exception
-    db_access.report_bookings_per_listing(cinema_id)
-    db_access.report_monthly_revenue(cinema_id, "2026-05")
-    db_access.report_staff_bookings(cinema_id, "2026-05")
+    reports = db_access.get_reports()
+    assert len(reports) > 0
+    assert reports[0]["report_type"] == "revenue"
 
 def test_report_invalid_format():
     with pytest.raises(ValueError, match="Invalid year_month format"):
