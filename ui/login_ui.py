@@ -99,7 +99,7 @@ class LoginUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Horizon Cinemas — Login")
-        self.geometry("460x560")
+        self.geometry("460x640")
         self.resizable(False, False)
         self.configure(bg=PALETTE["bg"])
         apply_dark_style(self)
@@ -108,64 +108,106 @@ class LoginUI(tk.Tk):
     def _build(self):
         # ── Header ────────────────────────────────────────────────────────────
         header = tk.Frame(self, bg=PALETTE["bg"])
-        header.pack(pady=(48, 0))
+        header.pack(pady=(40, 0))
 
-        tk.Label(header, text="🎬", font=("Helvetica", 48),
+        tk.Label(header, text="🎬", font=("Helvetica", 42),
                  bg=PALETTE["bg"], fg=PALETTE["accent"]).pack()
         tk.Label(header, text="HORIZON CINEMAS",
-                 font=("Helvetica", 20, "bold"),
-                 bg=PALETTE["bg"], fg=PALETTE["text"]).pack(pady=(4, 0))
+                 font=("Helvetica", 18, "bold"),
+                 bg=PALETTE["bg"], fg=PALETTE["text"]).pack(pady=(2, 0))
         tk.Label(header, text="Booking Management System",
                  font=("Helvetica", 10),
                  bg=PALETTE["bg"], fg=PALETTE["muted"]).pack()
+
+        # ── Role Selection ───────────────────────────────────────────────────
+        role_container = tk.Frame(self, bg=PALETTE["bg"])
+        role_container.pack(pady=(20, 0), padx=48, fill="x")
+
+        roles = [
+            ("Admin", "🛡️", "admin"),
+            ("Manager", "💼", "manager"),
+            ("Staff", "🎟️", "staff1")
+        ]
+
+        self._role_btns = {}
+        for name, icon, uname in roles:
+            btn_frame = tk.Frame(role_container, bg=PALETTE["bg"])
+            btn_frame.pack(side="left", expand=True, fill="both", padx=4)
+
+            # Enhanced role buttons
+            b = tk.Button(btn_frame, 
+                          text=f"{icon}\n{name}",
+                          font=("Helvetica", 10, "bold"),
+                          bg=PALETTE["surface"], fg=PALETTE["text"],
+                          activebackground=PALETTE["accent"], activeforeground="white",
+                          relief="flat", bd=0, padx=10, pady=10,
+                          cursor="hand2",
+                          command=lambda u=uname: self._select_role(u))
+            b.pack(expand=True, fill="both")
+            
+            # Simple hover effect
+            b.bind("<Enter>", lambda e, btn=b: btn.config(bg=PALETTE["accent2"]))
+            b.bind("<Leave>", lambda e, btn=b: btn.config(bg=PALETTE["surface"]))
+            
+            self._role_btns[name] = b
 
         # ── Card ──────────────────────────────────────────────────────────────
         card = tk.Frame(self, bg=PALETTE["surface"],
                         bd=0, highlightthickness=1,
                         highlightbackground=PALETTE["border"])
-        card.pack(padx=48, pady=32, fill="x")
+        card.pack(padx=48, pady=20, fill="x")
 
         inner = tk.Frame(card, bg=PALETTE["surface"])
-        inner.pack(padx=28, pady=28, fill="x")
+        inner.pack(padx=28, pady=20, fill="x")
 
         tk.Label(inner, text="Sign In", font=FONT_TITLE,
                  bg=PALETTE["surface"], fg=PALETTE["text"]).pack(anchor="w")
         tk.Label(inner, text="Enter your credentials to continue",
                  font=FONT_SUB,
-                 bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w", pady=(4, 20))
+                 bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w", pady=(4, 12))
 
         # Username
         tk.Label(inner, text="Username", font=FONT_LABEL,
                  bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w")
         self._username = ttk.Entry(inner, font=FONT_INPUT)
-        self._username.pack(fill="x", pady=(2, 14), ipady=6)
+        self._username.pack(fill="x", pady=(2, 12), ipady=6)
         self._username.focus()
 
         # Password
         tk.Label(inner, text="Password", font=FONT_LABEL,
                  bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w")
         self._password = ttk.Entry(inner, show="●", font=FONT_INPUT)
-        self._password.pack(fill="x", pady=(2, 20), ipady=6)
+        self._password.pack(fill="x", pady=(2, 16), ipady=6)
         self._password.bind("<Return>", lambda e: self._login())
 
-        # Login button
-        btn = tk.Button(inner, text="Sign In →",
-                        font=FONT_BUTTON,
-                        bg=PALETTE["accent"], fg="white",
-                        activebackground="#C0392B", activeforeground="white",
+        # Login button - Enhanced visibility
+        btn = tk.Button(inner, text="SIGN IN →",
+                        font=("Helvetica", 12, "bold"),
+                        bg="#FF2E63", fg="white", # Brighter coral/pink
+                        activebackground="#E94560", activeforeground="white",
                         relief="flat", cursor="hand2",
                         command=self._login)
-        btn.pack(fill="x", ipady=8)
+        btn.pack(fill="x", ipady=10)
 
         # Status label
         self._status = tk.Label(inner, text="", font=FONT_LABEL,
                                 bg=PALETTE["surface"], fg=PALETTE["accent"])
-        self._status.pack(pady=(10, 0))
+        self._status.pack(pady=(8, 0))
 
         # ── Footer ────────────────────────────────────────────────────────────
-        tk.Label(self, text="Default accounts — admin / manager / staff1",
+        tk.Label(self, text="Select a portal to pre-fill or enter credentials manually",
                  font=("Helvetica", 8),
-                 bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(pady=(0, 12))
+                 bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(pady=(10, 10))
+
+    def _select_role(self, username):
+        """Pre-fill username and focus password when a role is clicked."""
+        self._username.delete(0, tk.END)
+        self._username.insert(0, username)
+        
+        # We no longer pre-fill the password for security/design preference.
+        self._password.delete(0, tk.END)
+        self._password.focus()
+        self._status.config(text=f"Selected {username.capitalize()} Portal", fg=PALETTE["muted"])
 
     def _login(self):
         username = self._username.get()
