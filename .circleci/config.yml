@@ -1,0 +1,119 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@2.1.1
+
+jobs:
+  # ── 1. Quality Assurance ──────────────────────────────────────────────────
+  quality:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Install Quality Tools
+          command: pip install flake8 black bandit
+      - run:
+          name: Lint with flake8
+          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - run:
+          name: Check Formatting with Black
+          command: black . --check
+      - run:
+          name: Security Scan with Bandit
+          command: bandit -r . -ll
+
+  # ── 2. Testing ───────────────────────────────────────────────────────────
+  test:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Run Pytest with Coverage
+          command: |
+            pip install pytest-cov
+            pytest --cov=. --cov-report=xml --cov-report=term-missing
+      - store_artifacts:
+          path: coverage.xml
+      - store_test_results:
+          path: test-results
+
+  # ── 3. Build (Linux) ─────────────────────────────────────────────────────
+  build-linux:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python3-tk binutils
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Install PyInstaller
+          command: pip install pyinstaller
+      - run:
+          name: Build Executable
+          command: |
+            pyinstaller --onefile --noconsole --name "HorizonBookingSystem-linux" --add-data "database:database" main.py
+      - store_artifacts:
+          path: dist/HorizonBookingSystem-linux
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/HorizonBookingSystem-linux
+
+  # ── 4. Release (on Tag) ──────────────────────────────────────────────────
+  release:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create GitHub Release
+          command: |
+            # Check if GH_TOKEN is set
+            if [ -z "$GH_TOKEN" ]; then
+              echo "GH_TOKEN not found. Skipping release."
+              exit 0
+            fi
+            TAG=$CIRCLE_TAG
+            gh release create "$TAG" dist/HorizonBookingSystem-linux --title "Release $TAG" --notes "Automated release from CircleCI"
+
+workflows:
+  version: 2
+  ci_cd_pipeline:
+    jobs:
+      - quality:
+          filters:
+            tags:
+              only: /^v.*/
+      - test:
+          requires:
+            - quality
+          filters:
+            tags:
+              only: /^v.*/
+      - build-linux:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+      - release:
+          requires:
+            - build-linux
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
