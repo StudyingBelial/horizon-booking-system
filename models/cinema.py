@@ -11,9 +11,9 @@ from database.db_manager import db
 class Cinema:
     def __init__(self, cinemaId: int, name: str, city: str, address: str):
         self.cinemaId = cinemaId
-        self.name     = name
-        self.city     = city
-        self.address  = address
+        self.name = name
+        self.city = city
+        self.address = address
 
     # ── Factory ───────────────────────────────────────────────────────────────
 
@@ -36,6 +36,7 @@ class Cinema:
     def getScreens(self):
         """Return all Screen objects belonging to this cinema."""
         from models.screen import Screen
+
         rows = db.fetchall(
             "SELECT * FROM screens WHERE cinemaId=? ORDER BY screenNumber",
             (self.cinemaId,),
@@ -45,6 +46,7 @@ class Cinema:
     def getListings(self):
         """Return upcoming listings for this cinema."""
         from models.listing import Listing
+
         rows = db.fetchall(
             """
             SELECT l.* FROM listings l
@@ -66,4 +68,3 @@ class Cinema:
 
     def __repr__(self):
         return f"<Cinema id={self.cinemaId} name={self.name!r} city={self.city}>"
-

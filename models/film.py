@@ -9,14 +9,21 @@ from database.db_manager import db
 
 
 class Film:
-    def __init__(self, filmId: int, title: str, description: str,
-                 genre: str, ageRating: str, actors: str):
-        self.filmId      = filmId
-        self.title       = title
+    def __init__(
+        self,
+        filmId: int,
+        title: str,
+        description: str,
+        genre: str,
+        ageRating: str,
+        actors: str,
+    ):
+        self.filmId = filmId
+        self.title = title
         self.description = description or ""
-        self.genre       = genre or ""
-        self.ageRating   = ageRating or ""
-        self.actors      = actors or ""
+        self.genre = genre or ""
+        self.ageRating = ageRating or ""
+        self.actors = actors or ""
 
     @staticmethod
     def from_row(row) -> "Film":
@@ -34,14 +41,13 @@ class Film:
 
     def getDetails(self) -> dict:
         return {
-            "filmId":      self.filmId,
-            "title":       self.title,
+            "filmId": self.filmId,
+            "title": self.title,
             "description": self.description,
-            "genre":       self.genre,
-            "ageRating":   self.ageRating,
-            "actors":      self.actors,
+            "genre": self.genre,
+            "ageRating": self.ageRating,
+            "actors": self.actors,
         }
 
     def __repr__(self):
         return f"<Film id={self.filmId} title={self.title!r}>"
-

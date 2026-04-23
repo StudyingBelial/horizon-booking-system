@@ -19,21 +19,21 @@ def seed():
     if existing["c"] == 0:
         rules = [
             # (city, showType, basePrice)
-            ("London",     "Standard",  12.00),
-            ("London",     "IMAX",      16.00),
-            ("London",     "3D",        14.00),
-            ("London",     "Directors", 18.00),
-            ("Bristol",    "Standard",  10.00),
-            ("Bristol",    "IMAX",      14.00),
-            ("Bristol",    "3D",        12.00),
-            ("Bristol",    "Directors", 15.00),
-            ("Cardiff",    "Standard",   9.50),
-            ("Cardiff",    "IMAX",      13.00),
-            ("Cardiff",    "3D",        11.00),
-            ("Cardiff",    "Directors", 14.00),
-            ("Birmingham", "Standard",   7.00),
-            ("Birmingham", "IMAX",      10.00),
-            ("Birmingham", "3D",         9.00),
+            ("London", "Standard", 12.00),
+            ("London", "IMAX", 16.00),
+            ("London", "3D", 14.00),
+            ("London", "Directors", 18.00),
+            ("Bristol", "Standard", 10.00),
+            ("Bristol", "IMAX", 14.00),
+            ("Bristol", "3D", 12.00),
+            ("Bristol", "Directors", 15.00),
+            ("Cardiff", "Standard", 9.50),
+            ("Cardiff", "IMAX", 13.00),
+            ("Cardiff", "3D", 11.00),
+            ("Cardiff", "Directors", 14.00),
+            ("Birmingham", "Standard", 7.00),
+            ("Birmingham", "IMAX", 10.00),
+            ("Birmingham", "3D", 9.00),
             ("Birmingham", "Directors", 11.00),
         ]
         db.executemany(
@@ -45,14 +45,14 @@ def seed():
     existing = db.fetchone("SELECT COUNT(*) as c FROM cinemas")
     if existing["c"] == 0:
         cinemas = [
-            ("Horizon West End",      "London",     "1 Leicester Square, London"),
-            ("Horizon Canary Wharf",  "London",     "25 Churchill Place, London"),
-            ("Horizon Cabot",         "Bristol",    "5 Cabot Circus, Bristol"),
-            ("Horizon Cribbs",        "Bristol",    "Cribbs Causeway, Bristol"),
-            ("Horizon Cardiff Bay",   "Cardiff",    "Mermaid Quay, Cardiff"),
-            ("Horizon St David's",    "Cardiff",    "Bridge St, Cardiff"),
-            ("Horizon Bullring",      "Birmingham", "Bullring Shopping Centre, Birmingham"),
-            ("Horizon Brindley",      "Birmingham", "Brindleyplace, Birmingham"),
+            ("Horizon West End", "London", "1 Leicester Square, London"),
+            ("Horizon Canary Wharf", "London", "25 Churchill Place, London"),
+            ("Horizon Cabot", "Bristol", "5 Cabot Circus, Bristol"),
+            ("Horizon Cribbs", "Bristol", "Cribbs Causeway, Bristol"),
+            ("Horizon Cardiff Bay", "Cardiff", "Mermaid Quay, Cardiff"),
+            ("Horizon St David's", "Cardiff", "Bridge St, Cardiff"),
+            ("Horizon Bullring", "Birmingham", "Bullring Shopping Centre, Birmingham"),
+            ("Horizon Brindley", "Birmingham", "Brindleyplace, Birmingham"),
         ]
         db.executemany(
             "INSERT INTO cinemas(name, city, address) VALUES (?,?,?)", cinemas
@@ -64,12 +64,12 @@ def seed():
         # (cinemaId, screenNumber, totalCapacity, lowerHall, upperGallery)
         screens = [
             (1, 1, 120, 80, 40),
-            (1, 2,  80, 60, 20),
+            (1, 2, 80, 60, 20),
             (2, 1, 100, 70, 30),
-            (3, 1,  90, 60, 30),
-            (4, 1,  90, 60, 30),
-            (5, 1,  85, 55, 30),
-            (6, 1,  85, 55, 30),
+            (3, 1, 90, 60, 30),
+            (4, 1, 90, 60, 30),
+            (5, 1, 85, 55, 30),
+            (6, 1, 85, 55, 30),
             (7, 1, 110, 70, 40),
             (8, 1, 110, 70, 40),
         ]
@@ -91,31 +91,36 @@ def seed():
             (
                 "Galactic Odyssey",
                 "An epic journey across star systems.",
-                "Sci-Fi", "PG-13",
+                "Sci-Fi",
+                "PG-13",
                 "Jane Doe, John Smith",
             ),
             (
                 "The Last Ember",
                 "A war drama set in 1944 Europe.",
-                "Drama", "15",
+                "Drama",
+                "15",
                 "Alice Brown, Robert Green",
             ),
             (
                 "Laugh Out Loud",
                 "A hilarious family comedy.",
-                "Comedy", "PG",
+                "Comedy",
+                "PG",
                 "Tom White, Lucy Black",
             ),
             (
                 "Shadow Protocol",
                 "A gripping spy thriller.",
-                "Thriller", "15",
+                "Thriller",
+                "15",
                 "Chris Stone, Emma Lake",
             ),
             (
                 "Roar of the Wild",
                 "Documentary about African wildlife.",
-                "Documentary", "U",
+                "Documentary",
+                "U",
                 "David Attenborough Jr.",
             ),
         ]
@@ -129,14 +134,15 @@ def seed():
     existing = db.fetchone("SELECT COUNT(*) as c FROM listings")
     if existing["c"] == 0:
         from datetime import date, timedelta
+
         today = date.today()
         listings = []
         show_configs = [
             (1, 1, "Standard", "10:00"),
-            (1, 1, "IMAX",     "13:30"),
-            (2, 3, "3D",       "16:00"),
+            (1, 1, "IMAX", "13:30"),
+            (2, 3, "3D", "16:00"),
             (3, 4, "Standard", "18:30"),
-            (4, 5, "Directors","20:00"),
+            (4, 5, "Directors", "20:00"),
             (5, 7, "Standard", "11:00"),
         ]
         for days_ahead in range(1, 8):
@@ -154,10 +160,10 @@ def seed():
     existing = db.fetchone("SELECT COUNT(*) as c FROM users")
     if existing["c"] == 0:
         users = [
-            ("admin",   hash_password("admin123"),   "admin@horizon.com",   "Admin"),
+            ("admin", hash_password("admin123"), "admin@horizon.com", "Admin"),
             ("manager", hash_password("manager123"), "manager@horizon.com", "Manager"),
-            ("staff1",  hash_password("staff123"),   "staff1@horizon.com",  "BookingStaff"),
-            ("staff2",  hash_password("staff456"),   "staff2@horizon.com",  "BookingStaff"),
+            ("staff1", hash_password("staff123"), "staff1@horizon.com", "BookingStaff"),
+            ("staff2", hash_password("staff456"), "staff2@horizon.com", "BookingStaff"),
         ]
         db.executemany(
             "INSERT INTO users(username, passwordHash, email, role) VALUES (?,?,?,?)",
@@ -201,4 +207,3 @@ def _gen_seats(screen_id: int, seat_type: str, count: int, start_row: str):
         col = (i % per_row) + 1
         seats.append((screen_id, f"{row}{col}", seat_type))
     return seats
-

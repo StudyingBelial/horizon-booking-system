@@ -12,10 +12,10 @@ from utils.constants import SeatType
 
 class Seat:
     def __init__(self, seatId: int, screenId: int, seatNumber: str, seatType: str):
-        self.seatId     = seatId
-        self.screenId   = screenId
+        self.seatId = seatId
+        self.screenId = screenId
         self.seatNumber = seatNumber
-        self.seatType   = seatType
+        self.seatType = seatType
 
     @staticmethod
     def from_row(row) -> "Seat":
@@ -57,4 +57,3 @@ class Seat:
 
     def __repr__(self):
         return f"<Seat id={self.seatId} number={self.seatNumber} type={self.seatType}>"
-

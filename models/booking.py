@@ -13,17 +13,25 @@ from config import CANCELLATION_REFUND_RATE, MIN_CANCEL_DAYS_BEFORE_SHOW
 
 
 class Booking:
-    def __init__(self, bookingId: int, bookingRef: str, listingId: int,
-                 staffId: int, bookingDate: str, numTickets: int,
-                 totalCost: float, status: str):
-        self.bookingId   = bookingId
-        self.bookingRef  = bookingRef
-        self.listingId   = listingId
-        self.staffId     = staffId
+    def __init__(
+        self,
+        bookingId: int,
+        bookingRef: str,
+        listingId: int,
+        staffId: int,
+        bookingDate: str,
+        numTickets: int,
+        totalCost: float,
+        status: str,
+    ):
+        self.bookingId = bookingId
+        self.bookingRef = bookingRef
+        self.listingId = listingId
+        self.staffId = staffId
         self.bookingDate = bookingDate
-        self.numTickets  = numTickets
-        self.totalCost   = totalCost
-        self.status      = status
+        self.numTickets = numTickets
+        self.totalCost = totalCost
+        self.status = status
 
     # ── Factories ─────────────────────────────────────────────────────────────
 
@@ -33,42 +41,46 @@ class Booking:
 
     @staticmethod
     def get_by_ref(booking_ref: str) -> "Booking":
-        row = db.fetchone(
-            "SELECT * FROM bookings WHERE bookingRef=?", (booking_ref,)
-        )
+        row = db.fetchone("SELECT * FROM bookings WHERE bookingRef=?", (booking_ref,))
         return Booking.from_row(row) if row else None
 
     @staticmethod
     def get_all():
-        rows = db.fetchall(
-            "SELECT * FROM bookings ORDER BY bookingDate DESC"
-        )
+        rows = db.fetchall("SELECT * FROM bookings ORDER BY bookingDate DESC")
         return [Booking.from_row(r) for r in rows]
 
     @staticmethod
-    def create(listing_id: int, staff_id: int, num_tickets: int,
-               total_cost: float) -> "Booking":
+    def create(
+        listing_id: int, staff_id: int, num_tickets: int, total_cost: float
+    ) -> "Booking":
         """Persist a new Confirmed booking and return the instance."""
-        ref  = generate_booking_ref()
+        ref = generate_booking_ref()
         date = now_str()
-        cur  = db.execute(
+        cur = db.execute(
             """
             INSERT INTO bookings
               (bookingRef, listingId, staffId, bookingDate, numTickets, totalCost, status)
             VALUES (?,?,?,?,?,?,?)
             """,
-            (ref, listing_id, staff_id, date, num_tickets, total_cost,
-             BookingStatus.CONFIRMED),
+            (
+                ref,
+                listing_id,
+                staff_id,
+                date,
+                num_tickets,
+                total_cost,
+                BookingStatus.CONFIRMED,
+            ),
         )
         return Booking(
-            bookingId   = db.last_insert_id(cur),
-            bookingRef  = ref,
-            listingId   = listing_id,
-            staffId     = staff_id,
-            bookingDate = date,
-            numTickets  = num_tickets,
-            totalCost   = total_cost,
-            status      = BookingStatus.CONFIRMED,
+            bookingId=db.last_insert_id(cur),
+            bookingRef=ref,
+            listingId=listing_id,
+            staffId=staff_id,
+            bookingDate=date,
+            numTickets=num_tickets,
+            totalCost=total_cost,
+            status=BookingStatus.CONFIRMED,
         )
 
     # ── Domain logic ──────────────────────────────────────────────────────────
@@ -81,13 +93,16 @@ class Booking:
     def isEligibleCancel(self) -> bool:
         """Cancellation allowed only if showDate is strictly more than 1 day away."""
         from models.listing import Listing
+
         listing = Listing.get_by_id(self.listingId)
         if not listing:
             return False
         show = date.fromisoformat(listing.showDate)
         delta = (show - date.today()).days
-        return (self.status == BookingStatus.CONFIRMED and
-                delta > MIN_CANCEL_DAYS_BEFORE_SHOW)
+        return (
+            self.status == BookingStatus.CONFIRMED
+            and delta > MIN_CANCEL_DAYS_BEFORE_SHOW
+        )
 
     def cancel(self) -> bool:
         """Mark booking as Cancelled in the database."""
@@ -103,19 +118,21 @@ class Booking:
     def getBookedSeats(self):
         """Return all BookedSeat records for this booking."""
         from models.booked_seat import BookedSeat
+
         return BookedSeat.get_by_booking(self.bookingId)
 
     def getListing(self):
         from models.listing import Listing
+
         return Listing.get_by_id(self.listingId)
 
     def generateReceipt(self) -> str:
         """Build a human-readable receipt string."""
         listing = self.getListing()
-        film    = listing.getFilm() if listing else None
-        screen  = listing.getScreen() if listing else None
-        cinema  = screen.getCinema() if screen else None
-        seats   = self.getBookedSeats()
+        film = listing.getFilm() if listing else None
+        screen = listing.getScreen() if listing else None
+        cinema = screen.getCinema() if screen else None
+        seats = self.getBookedSeats()
 
         seat_lines = "\n".join(
             f"  {i+1}. Seat {s.seatId} [{s.ticketType}] – {format_currency(s.priceCharged)}"
@@ -143,6 +160,7 @@ class Booking:
         )
 
     def __repr__(self):
-        return (f"<Booking ref={self.bookingRef} status={self.status} "
-                f"total=£{self.totalCost:.2f}>")
-
+        return (
+            f"<Booking ref={self.bookingRef} status={self.status} "
+            f"total=£{self.totalCost:.2f}>"
+        )

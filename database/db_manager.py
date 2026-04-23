@@ -84,4 +84,3 @@ class DBManager:
 
 # Module-level singleton for convenient import
 db = DBManager()
-

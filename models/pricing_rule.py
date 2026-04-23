@@ -17,12 +17,12 @@ class PricingRule:
     """
 
     upperPremium = UPPER_GALLERY_PREMIUM  # 1.20
-    vipPremium   = VIP_PREMIUM            # 1.44
+    vipPremium = VIP_PREMIUM  # 1.44
 
     def __init__(self, ruleId: int, city: str, showType: str, basePrice: float):
-        self.ruleId    = ruleId
-        self.city      = city
-        self.showType  = showType
+        self.ruleId = ruleId
+        self.city = city
+        self.showType = showType
         self.basePrice = basePrice
 
     @staticmethod
@@ -61,6 +61,7 @@ class PricingRule:
         return round(self.basePrice * self.vipPremium, 2)
 
     def __repr__(self):
-        return (f"<PricingRule city={self.city} showType={self.showType} "
-                f"base=£{self.basePrice:.2f}>")
-
+        return (
+            f"<PricingRule city={self.city} showType={self.showType} "
+            f"base=£{self.basePrice:.2f}>"
+        )

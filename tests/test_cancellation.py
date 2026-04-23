@@ -7,14 +7,15 @@ tests/test_cancellation.py — Unit tests for cancellation rules.
 
 import unittest
 import sys, os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from database.db_manager import db
-from database.seed_data  import seed
+from database.seed_data import seed
 from controllers.booking_controller import BookingController
-from services.validation_service    import ValidationError
-from models.listing      import Listing
-from models.booking      import Booking
+from services.validation_service import ValidationError
+from models.listing import Listing
+from models.booking import Booking
 from models.cancellation import Cancellation
 
 
@@ -23,6 +24,7 @@ class TestCancellationFlow(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         import sqlite3
+
         db._instance._connection = None
         db._connection = sqlite3.connect(":memory:", check_same_thread=False)
         db._connection.row_factory = sqlite3.Row
@@ -33,8 +35,8 @@ class TestCancellationFlow(unittest.TestCase):
 
     def _make_booking(self) -> Booking:
         """Helper to create a fresh booking for testing."""
-        listing  = Listing.get_upcoming()[-1] # Pick the last one (7 days ahead)
-        seats    = listing.getAvailableSeats()
+        listing = Listing.get_upcoming()[-1]  # Pick the last one (7 days ahead)
+        seats = listing.getAvailableSeats()
         if not seats:
             self.skipTest("No available seats")
         result = self.ctrl.create_booking(
@@ -51,13 +53,13 @@ class TestCancellationFlow(unittest.TestCase):
     def test_cancellation_refund_amount(self):
         """Refund must equal 50 % of total cost."""
         booking = self._make_booking()
-        refund  = Cancellation.calcRefundStatic(booking.totalCost)
+        refund = Cancellation.calcRefundStatic(booking.totalCost)
         self.assertAlmostEqual(refund, booking.totalCost * 0.5, places=2)
 
     def test_cancel_updates_status(self):
         """Cancelling a booking should set its status to Cancelled."""
         booking = self._make_booking()
-        result  = self.ctrl.cancel_booking(booking.bookingRef)
+        result = self.ctrl.cancel_booking(booking.bookingRef)
         self.assertTrue(result["success"])
         updated = Booking.get_by_ref(booking.bookingRef)
         self.assertEqual(updated.status, "Cancelled")
@@ -78,13 +80,10 @@ class TestCancellationFlow(unittest.TestCase):
         """A cancellations row must be persisted after cancellation."""
         booking = self._make_booking()
         self.ctrl.cancel_booking(booking.bookingRef)
-        record  = Cancellation.get_by_ref(booking.bookingRef)
+        record = Cancellation.get_by_ref(booking.bookingRef)
         self.assertIsNotNone(record)
-        self.assertAlmostEqual(
-            record.refundAmount, booking.totalCost * 0.5, places=2
-        )
+        self.assertAlmostEqual(record.refundAmount, booking.totalCost * 0.5, places=2)
 
 
 if __name__ == "__main__":
     unittest.main()
-

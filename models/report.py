@@ -18,8 +18,8 @@ class Report:
     REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 
     def __init__(self, report_type: str, data: list, generated_at: str = None):
-        self.report_type  = report_type
-        self.data         = data          # list of dicts
+        self.report_type = report_type
+        self.data = data  # list of dicts
         self.generated_at = generated_at or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # ── Factory methods ───────────────────────────────────────────────────────
@@ -46,8 +46,7 @@ class Report:
 
     @staticmethod
     def _bookings_report(**kwargs) -> "Report":
-        rows = db.fetchall(
-            """
+        rows = db.fetchall("""
             SELECT b.bookingRef, f.title as film, l.showDate, l.showTime,
                    l.showType, c.name as cinema, b.numTickets,
                    b.totalCost, b.status, b.bookingDate
@@ -57,8 +56,7 @@ class Report:
             JOIN screens s  ON l.screenId  = s.screenId
             JOIN cinemas c  ON s.cinemaId  = c.cinemaId
             ORDER BY b.bookingDate DESC
-            """
-        )
+            """)
         return Report("bookings", [dict(r) for r in rows])
 
     @staticmethod
@@ -97,7 +95,7 @@ class Report:
         if month:
             query += " AND b.bookingDate LIKE ?"
             params.append(f"{month}%")
-        
+
         query += " GROUP BY f.filmId ORDER BY total_revenue DESC"
         rows = db.fetchall(query, tuple(params))
         return Report("top_film", [dict(r) for r in rows])
@@ -123,8 +121,7 @@ class Report:
 
     @staticmethod
     def _cancellations_report(**kwargs) -> "Report":
-        rows = db.fetchall(
-            """
+        rows = db.fetchall("""
             SELECT cn.bookingRef, cn.cancelDate, cn.refundAmount,
                    b.totalCost, f.title as film, l.showDate
             FROM cancellations cn
@@ -132,14 +129,12 @@ class Report:
             JOIN listings l ON b.listingId   = l.listingId
             JOIN films f    ON l.filmId      = f.filmId
             ORDER BY cn.cancelDate DESC
-            """
-        )
+            """)
         return Report("cancellations", [dict(r) for r in rows])
 
     @staticmethod
     def _occupancy_report(**kwargs) -> "Report":
-        rows = db.fetchall(
-            """
+        rows = db.fetchall("""
             SELECT l.listingId, f.title as film, l.showDate, l.showTime,
                    c.name as cinema, s.totalCapacity,
                    COUNT(bs.id) as booked_seats,
@@ -152,8 +147,7 @@ class Report:
             LEFT JOIN booked_seats bs ON b.bookingId = bs.bookingId
             GROUP BY l.listingId
             ORDER BY l.showDate DESC
-            """
-        )
+            """)
         return Report("occupancy", [dict(r) for r in rows])
 
     # ── Export ────────────────────────────────────────────────────────────────
@@ -162,7 +156,7 @@ class Report:
         """Export report data to CSV. Returns the filepath used."""
         os.makedirs(self.REPORTS_DIR, exist_ok=True)
         if filepath is None:
-            ts       = datetime.now().strftime("%Y%m%d_%H%M%S")
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"report_{self.report_type}_{ts}.csv"
             filepath = os.path.join(self.REPORTS_DIR, filename)
 
@@ -178,4 +172,3 @@ class Report:
 
     def __repr__(self):
         return f"<Report type={self.report_type} rows={len(self.data)}>"
-

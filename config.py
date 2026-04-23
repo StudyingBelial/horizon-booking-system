@@ -17,8 +17,8 @@ DATABASE_PATH = os.path.join(BASE_DIR, "data", "hcbs.db")
 APP_NAME = "Horizon Cinemas Booking System"
 
 # ── Pricing multipliers ──────────────────────────────────────────────────────
-UPPER_GALLERY_PREMIUM = 1.20   # +20 % over base
-VIP_PREMIUM           = 1.44   # base × 1.2 × 1.2  (applied on top of upper)
+UPPER_GALLERY_PREMIUM = 1.20  # +20 % over base
+VIP_PREMIUM = 1.44  # base × 1.2 × 1.2  (applied on top of upper)
 
 # Cancellation refund rate (50 %)
 CANCELLATION_REFUND_RATE = 0.50
@@ -28,4 +28,3 @@ MAX_ADVANCE_BOOKING_DAYS = 7
 
 # Minimum days before showDate that cancellation is allowed (> 1 day away)
 MIN_CANCEL_DAYS_BEFORE_SHOW = 1
-
