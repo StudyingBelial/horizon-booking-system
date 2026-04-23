@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 database/seed_data.py — Populates the database with initial sample data.
 
@@ -16,18 +19,22 @@ def seed():
     if existing["c"] == 0:
         rules = [
             # (city, showType, basePrice)
-            ("London",  "Standard",  12.00),
-            ("London",  "IMAX",      16.00),
-            ("London",  "3D",        14.00),
-            ("London",  "Directors", 18.00),
-            ("Bristol", "Standard",  10.00),
-            ("Bristol", "IMAX",      14.00),
-            ("Bristol", "3D",        12.00),
-            ("Bristol", "Directors", 15.00),
-            ("Cardiff", "Standard",   9.50),
-            ("Cardiff", "IMAX",      13.00),
-            ("Cardiff", "3D",        11.00),
-            ("Cardiff", "Directors", 14.00),
+            ("London",     "Standard",  12.00),
+            ("London",     "IMAX",      16.00),
+            ("London",     "3D",        14.00),
+            ("London",     "Directors", 18.00),
+            ("Bristol",    "Standard",  10.00),
+            ("Bristol",    "IMAX",      14.00),
+            ("Bristol",    "3D",        12.00),
+            ("Bristol",    "Directors", 15.00),
+            ("Cardiff",    "Standard",   9.50),
+            ("Cardiff",    "IMAX",      13.00),
+            ("Cardiff",    "3D",        11.00),
+            ("Cardiff",    "Directors", 14.00),
+            ("Birmingham", "Standard",   7.00),
+            ("Birmingham", "IMAX",      10.00),
+            ("Birmingham", "3D",         9.00),
+            ("Birmingham", "Directors", 11.00),
         ]
         db.executemany(
             "INSERT INTO pricing_rules(city, showType, basePrice) VALUES (?,?,?)",
@@ -38,10 +45,14 @@ def seed():
     existing = db.fetchone("SELECT COUNT(*) as c FROM cinemas")
     if existing["c"] == 0:
         cinemas = [
-            ("Horizon West End",    "London",  "1 Leicester Square, London"),
-            ("Horizon Canary Wharf","London",  "25 Churchill Place, London"),
-            ("Horizon Cabot",       "Bristol", "5 Cabot Circus, Bristol"),
-            ("Horizon Cardiff Bay", "Cardiff", "Mermaid Quay, Cardiff"),
+            ("Horizon West End",      "London",     "1 Leicester Square, London"),
+            ("Horizon Canary Wharf",  "London",     "25 Churchill Place, London"),
+            ("Horizon Cabot",         "Bristol",    "5 Cabot Circus, Bristol"),
+            ("Horizon Cribbs",        "Bristol",    "Cribbs Causeway, Bristol"),
+            ("Horizon Cardiff Bay",   "Cardiff",    "Mermaid Quay, Cardiff"),
+            ("Horizon St David's",    "Cardiff",    "Bridge St, Cardiff"),
+            ("Horizon Bullring",      "Birmingham", "Bullring Shopping Centre, Birmingham"),
+            ("Horizon Brindley",      "Birmingham", "Brindleyplace, Birmingham"),
         ]
         db.executemany(
             "INSERT INTO cinemas(name, city, address) VALUES (?,?,?)", cinemas
@@ -56,7 +67,11 @@ def seed():
             (1, 2,  80, 60, 20),
             (2, 1, 100, 70, 30),
             (3, 1,  90, 60, 30),
-            (4, 1,  85, 55, 30),
+            (4, 1,  90, 60, 30),
+            (5, 1,  85, 55, 30),
+            (6, 1,  85, 55, 30),
+            (7, 1, 110, 70, 40),
+            (8, 1, 110, 70, 40),
         ]
         db.executemany(
             "INSERT INTO screens(cinemaId, screenNumber, totalCapacity, "
@@ -119,10 +134,10 @@ def seed():
         show_configs = [
             (1, 1, "Standard", "10:00"),
             (1, 1, "IMAX",     "13:30"),
-            (2, 2, "3D",       "16:00"),
-            (3, 1, "Standard", "18:30"),
-            (4, 3, "Directors","20:00"),
-            (5, 4, "Standard", "11:00"),
+            (2, 3, "3D",       "16:00"),
+            (3, 4, "Standard", "18:30"),
+            (4, 5, "Directors","20:00"),
+            (5, 7, "Standard", "11:00"),
         ]
         for days_ahead in range(1, 8):
             show_date = (today + timedelta(days=days_ahead)).strftime("%Y-%m-%d")
@@ -166,8 +181,8 @@ def _create_seats_for_all_screens():
         # Upper Gallery: rows E-F
         upper = s["upperGallerySeats"]
         all_seats += _gen_seats(screen_id, "Upper", upper, start_row="E")
-        # VIP seats: always 6
-        for i in range(1, 7):
+        # VIP seats: always 10 (as per spec)
+        for i in range(1, 11):
             all_seats.append((screen_id, f"VIP-{i:02d}", "VIP"))
 
     db.executemany(
@@ -186,3 +201,4 @@ def _gen_seats(screen_id: int, seat_type: str, count: int, start_row: str):
         col = (i % per_row) + 1
         seats.append((screen_id, f"{row}{col}", seat_type))
     return seats
+

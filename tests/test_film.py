@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.film import Film
@@ -64,3 +67,4 @@ def test_film_get_details():
 def test_film_repr():
     film = Film(1, "Inception", "", "", "", "")
     assert repr(film) == "<Film id=1 title='Inception'>"
+

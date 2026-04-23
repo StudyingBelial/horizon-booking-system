@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 database/db_manager.py — Singleton database connection manager for HCBS.
 
@@ -81,3 +84,4 @@ class DBManager:
 
 # Module-level singleton for convenient import
 db = DBManager()
+

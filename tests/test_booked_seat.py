@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.booked_seat import BookedSeat
@@ -46,3 +49,4 @@ def test_booked_seat_get_seat(mock_get_seat):
 def test_booked_seat_repr():
     bs = BookedSeat(1, 10, 100, "Adult", 12.5)
     assert repr(bs) == "<BookedSeat bookingId=10 seatId=100 type=Adult price=£12.50>"
+

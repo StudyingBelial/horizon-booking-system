@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 utils/helpers.py — Utility functions used across HCBS.
 """
@@ -68,3 +71,4 @@ def is_non_empty(value: str) -> bool:
 
 def format_currency(amount: float) -> str:
     return f"£{amount:,.2f}"
+

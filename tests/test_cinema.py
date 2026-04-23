@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.cinema import Cinema
@@ -74,3 +77,4 @@ def test_cinema_get_price_base_not_found(mock_db):
 def test_cinema_repr():
     cinema = Cinema(1, "Odeon", "London", "Addr")
     assert repr(cinema) == "<Cinema id=1 name='Odeon' city=London>"
+

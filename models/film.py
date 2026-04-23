@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/film.py — Film domain model.
 """
@@ -41,3 +44,4 @@ class Film:
 
     def __repr__(self):
         return f"<Film id={self.filmId} title={self.title!r}>"
+

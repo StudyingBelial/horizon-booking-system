@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/booking.py — Booking domain model.
 """
@@ -142,3 +145,4 @@ class Booking:
     def __repr__(self):
         return (f"<Booking ref={self.bookingRef} status={self.status} "
                 f"total=£{self.totalCost:.2f}>")
+

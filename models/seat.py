@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/seat.py — Seat domain model.
 """
@@ -54,3 +57,4 @@ class Seat:
 
     def __repr__(self):
         return f"<Seat id={self.seatId} number={self.seatNumber} type={self.seatType}>"
+

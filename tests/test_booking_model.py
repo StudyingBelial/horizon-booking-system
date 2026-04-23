@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.booking import Booking
@@ -82,3 +85,4 @@ def test_booking_repr():
     booking = Booking(1, "REF1", 10, 100, "2026-05-10", 2, 25.0, BookingStatus.CONFIRMED)
     # The actual repr seems to include the Enum class name in this environment
     assert repr(booking) == f"<Booking ref=REF1 status={BookingStatus.CONFIRMED} total=£25.00>"
+

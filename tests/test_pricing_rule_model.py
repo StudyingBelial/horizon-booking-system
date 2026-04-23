@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.pricing_rule import PricingRule
@@ -35,3 +38,4 @@ def test_pricing_rule_get_price(seat_type, expected_factor):
 def test_pricing_rule_repr():
     rule = PricingRule(1, "London", "Standard", 10.0)
     assert repr(rule) == "<PricingRule city=London showType=Standard base=£10.00>"
+
