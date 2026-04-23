@@ -1,6 +1,3 @@
-# Author: StudyingBelial | Student ID: 1234567
-# Module: UFCF8S-30-2 Advanced Software Development
-
 import pytest
 from unittest.mock import MagicMock, patch
 from models.cancellation import Cancellation
