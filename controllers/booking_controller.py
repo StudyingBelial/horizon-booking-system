@@ -2,10 +2,12 @@
 controllers/booking_controller.py — Orchestrates the full booking and
 cancellation sequence flows.
 
+
 Flow:
   UI → BookingController → Listing / Screen / Seat / PricingRule
       → Booking.create() → BookedSeat.create() → DB
 """
+
 
 from models.listing import Listing
 from models.screen import Screen
@@ -146,3 +148,4 @@ class BookingController:
 
     def get_all_bookings(self) -> list:
         return Booking.get_all()
+        

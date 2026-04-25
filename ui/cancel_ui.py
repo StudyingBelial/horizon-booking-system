@@ -1,9 +1,11 @@
 # Author: StudyingBelial | Student ID: 1234567
 # Module: UFCF8S-30-2 Advanced Software Development
 
+
 """
 ui/cancel_ui.py — Booking cancellation interface.
 """
+
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -12,7 +14,10 @@ from ui.login_ui import PALETTE, FONT_TITLE, FONT_LABEL, FONT_BUTTON, FONT_INPUT
 from models.cancellation import Cancellation
 
 
+
+
 class CancelUI(tk.Toplevel):
+
 
     def __init__(self, master):
         super().__init__(master)
@@ -22,6 +27,7 @@ class CancelUI(tk.Toplevel):
         self.configure(bg=PALETTE["bg"])
         self._ctrl = BookingController()
         self._build()
+
 
     def _build(self):
         # Header
@@ -35,6 +41,7 @@ class CancelUI(tk.Toplevel):
             fg="white",
         ).pack(padx=16, anchor="w")
 
+
         # Card
         card = tk.Frame(
             self,
@@ -45,6 +52,7 @@ class CancelUI(tk.Toplevel):
         card.pack(padx=32, pady=24, fill="x")
         inner = tk.Frame(card, bg=PALETTE["surface"])
         inner.pack(padx=24, pady=24, fill="x")
+
 
         tk.Label(
             inner,
@@ -61,6 +69,7 @@ class CancelUI(tk.Toplevel):
             fg=PALETTE["muted"],
         ).pack(anchor="w", pady=(2, 16))
 
+
         ref_frame = tk.Frame(inner, bg=PALETTE["surface"])
         ref_frame.pack(fill="x")
         self._ref_var = tk.StringVar()
@@ -70,9 +79,11 @@ class CancelUI(tk.Toplevel):
         self._inner_card = inner
         self._btn(ref_frame, "Look Up", self._lookup, bg=PALETTE["accent2"])
 
+
         # Info frame (shown after lookup)
         self._info_frame = tk.Frame(inner, bg=PALETTE["surface"])
         self._info_frame.pack(fill="x", pady=(16, 0))
+
 
         # Confirm cancellation button (hidden until eligible booking is found)
         self._cancel_btn_f = tk.Button(
@@ -91,6 +102,7 @@ class CancelUI(tk.Toplevel):
         )
         # Not packed yet — shown only when booking is eligible
 
+
         # Status / result label
         self._status = tk.Label(
             inner,
@@ -102,6 +114,7 @@ class CancelUI(tk.Toplevel):
             justify="left",
         )
         self._status.pack(anchor="w", pady=(12, 0))
+
 
     def _btn(self, parent, text, command, bg=None, side="left", padx=4):
         color = bg if bg else PALETTE["accent"]
@@ -122,12 +135,14 @@ class CancelUI(tk.Toplevel):
         b.pack(side=side, padx=padx)
         return b
 
+
     def _lookup(self):
         # Clear previous results
         for w in self._info_frame.winfo_children():
             w.destroy()
         self._cancel_btn_f.pack_forget()
         self._status.config(text="")
+
 
         ref = self._ref_var.get().strip().upper()
         if not ref:
@@ -136,6 +151,7 @@ class CancelUI(tk.Toplevel):
             )
             return
 
+
         booking = self._ctrl.lookup_booking(ref)
         if not booking:
             self._status.config(
@@ -143,11 +159,14 @@ class CancelUI(tk.Toplevel):
             )
             return
 
+
         self._booking = booking
+
 
         # Display booking details
         listing = booking.getListing()
         film = listing.getFilm() if listing else None
+
 
         rows = [
             ("Booking Ref", booking.bookingRef),
@@ -159,6 +178,7 @@ class CancelUI(tk.Toplevel):
             ("Total Cost", f"£{booking.totalCost:.2f}"),
             ("Status", booking.status),
         ]
+
 
         for i, (label, value) in enumerate(rows):
             tk.Label(
@@ -180,9 +200,11 @@ class CancelUI(tk.Toplevel):
                 anchor="w",
             ).grid(row=i, column=1, sticky="w", padx=(16, 0), pady=1)
 
+
         # Check eligibility
         eligible = booking.isEligibleCancel()
         refund = Cancellation.calcRefundStatic(booking.totalCost)
+
 
         if eligible:
             self._status.config(
@@ -199,6 +221,7 @@ class CancelUI(tk.Toplevel):
                     "more than 1 day before the show date."
                 )
             self._status.config(text=msg, fg=PALETTE["warning"])
+
 
     def _confirm_cancel(self):
         ref = self._booking.bookingRef
