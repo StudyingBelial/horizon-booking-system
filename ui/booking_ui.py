@@ -43,6 +43,24 @@ class BookingUI(tk.Toplevel):
         self.title(f"Horizon Cinemas — Booking [{user.username}]")
         self.geometry("1050x720")
         self.configure(bg=PALETTE["bg"])
+        style = ttk.Style(self)
+        style.theme_use("clam")
+        style.configure(
+            "TCombobox",
+            fieldbackground=PALETTE["surface"],
+            background=PALETTE["surface"],
+            foreground=PALETTE["text"],
+            selectbackground=PALETTE["accent2"],
+            selectforeground="white",
+            arrowcolor=PALETTE["text"],
+        )
+        style.map(
+            "TCombobox",
+            fieldbackground=[("readonly", PALETTE["surface"])],
+            foreground=[("readonly", PALETTE["text"])],
+            selectbackground=[("readonly", PALETTE["accent2"])],
+            selectforeground=[("readonly", "white")],
+        )
         self._build()
         self._load_films()
 
@@ -188,7 +206,7 @@ class BookingUI(tk.Toplevel):
         self._listing_cb = ttk.Combobox(
             f2,
             textvariable=self._listing_var,
-            state="readonly",
+            state="disabled",
             font=FONT_INPUT,
             width=34,
         )
@@ -372,6 +390,8 @@ class BookingUI(tk.Toplevel):
         self._cinema_cb["values"] = list(self._cinemas_for_film.keys())
         self._cinema_var.set("")
         self._listing_var.set("")
+        self._listing_cb["values"] = []
+        self._listing_cb.configure(state="disabled")
         self._clear_seat_grid()
 
     def _on_cinema_select(self, _=None):
@@ -379,6 +399,9 @@ class BookingUI(tk.Toplevel):
         cinema_id = self._cinemas_for_film.get(cinema_key)
         film = getattr(self, "_selected_film", None)
         if not cinema_id or not film:
+            self._listing_var.set("")
+            self._listing_cb["values"] = []
+            self._listing_cb.configure(state="disabled")
             return
         rows = db.fetchall(
             """
@@ -402,6 +425,7 @@ class BookingUI(tk.Toplevel):
             labels.append(key)
         self._listing_cb["values"] = labels
         self._listing_var.set("")
+        self._listing_cb.configure(state="readonly")
         self._clear_seat_grid()
 
     def _on_listing_select(self, _=None):
@@ -525,10 +549,10 @@ class BookingUI(tk.Toplevel):
     def _update_price_display(self):
         if not self._listing:
             return
-        prices = self._ctrl.get_price_breakdown(self._listing.listingId)
-        self._price_lower.config(text=f"£{prices.get('Lower', 0):.2f}")
-        self._price_upper.config(text=f"£{prices.get('Upper', 0):.2f}")
-        self._price_vip.config(text=f"£{prices.get('VIP',   0):.2f}")
+        self._prices = self._ctrl.get_price_breakdown(self._listing.listingId)  # cache it
+        self._price_lower.config(text=f"£{self._prices.get('Lower', 0):.2f}")
+        self._price_upper.config(text=f"£{self._prices.get('Upper', 0):.2f}")
+        self._price_vip.config(text=f"£{self._prices.get('VIP',   0):.2f}")
 
     def _update_summary(self):
         if not self._selected:
@@ -538,15 +562,12 @@ class BookingUI(tk.Toplevel):
 
         from models.seat import Seat
 
+        prices = getattr(self, "_prices", {})  # use cached prices from ③
         seat_strs = []
         total = 0.0
         for sid in self._selected:
             seat = Seat.get_by_id(sid)
-            price = (
-                self._ctrl._pricing.get_seat_price(self._listing.listingId, sid)
-                if self._listing
-                else 0
-            )
+            price = prices.get(seat.seatType, 0)
             seat_strs.append(f"{seat.seatNumber} ({seat.seatType})")
             total += price
 
