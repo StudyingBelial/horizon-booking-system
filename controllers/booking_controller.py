@@ -53,13 +53,14 @@ class BookingController:
         self._validation.validate_seat_availability(screen, listing_id, seat_ids)
 
         # ── Step 3: Calculate prices ──────────────────────────────────────────
+        price_breakdown = self._pricing.get_price_breakdown(listing_id)
         seat_prices = []
         seat_objects = []
         for seat_id in seat_ids:
             seat = Seat.get_by_id(seat_id)
             if not seat:
                 raise ValidationError(f"Seat {seat_id} not found.")
-            price = self._pricing.get_seat_price(listing_id, seat_id)
+            price = price_breakdown.get(seat.seatType, 0.0)
             seat_prices.append((seat, price))
             seat_objects.append(seat)
 
