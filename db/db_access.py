@@ -50,6 +50,35 @@ def get_user_by_username(username: str) -> Optional[sqlite3.Row]:
         ).fetchone()
 
 
+def add_user(username: str, password_hash: str, email: str, role: str) -> int:
+    with get_connection() as conn:
+        cur = conn.execute(
+            "INSERT INTO users (username, password_hash, email, role) VALUES (?, ?, ?, ?)",
+            (username, password_hash, email, role)
+        )
+        return cur.lastrowid
+
+
+def add_admin(user_id: int):
+    with get_connection() as conn:
+        conn.execute("INSERT INTO admins (admin_id) VALUES (?)", (user_id,))
+
+
+def add_manager(user_id: int):
+    with get_connection() as conn:
+        conn.execute("INSERT INTO managers (manager_id) VALUES (?)", (user_id,))
+
+
+def add_booking_staff(user_id: int, cinema_id: int):
+    with get_connection() as conn:
+        conn.execute("INSERT INTO booking_staff (staff_id, cinema_id) VALUES (?, ?)", (user_id, cinema_id))
+
+
+def deactivate_user(user_id: int):
+    with get_connection() as conn:
+        conn.execute("UPDATE users SET is_active = 0 WHERE user_id = ?", (user_id,))
+
+
 # ── Cinemas & Cities ─────────────────────────────────────────
 
 def get_all_cinemas():
@@ -180,6 +209,19 @@ def add_film(title, description, genre, age_rating, duration_mins, actors) -> in
         return cur.lastrowid
 
 
+def update_film(film_id: int, **kwargs):
+    if not kwargs:
+        return
+    allowed_keys = {'title', 'description', 'genre', 'age_rating', 'duration_mins', 'actors'}
+    unknown = set(kwargs) - allowed_keys
+    if unknown:
+        raise ValueError(f"Unknown film fields: {unknown}")
+    updates, params = zip(*[(f"{k} = ?", v) for k, v in kwargs.items()])
+    query = "UPDATE films SET " + ", ".join(updates) + " WHERE film_id = ?"
+    with get_connection() as conn:
+        conn.execute(query, (*params, film_id))
+
+
 # ── Listings ─────────────────────────────────────────────────
 
 def get_listings_for_cinema(cinema_id: int, show_date: Optional[str] = None, upcoming_only: bool = False):
@@ -268,6 +310,19 @@ def get_pricing_rule(city_id: int, show_type: str):
             "SELECT * FROM pricing_rules WHERE city_id = ? AND show_type = ?",
             (city_id, show_type)
         ).fetchone()
+
+
+def update_pricing_rule(pricing_id: int, **kwargs):
+    if not kwargs:
+        return
+    allowed_keys = {'base_price', 'upper_premium', 'vip_premium'}
+    unknown = set(kwargs) - allowed_keys
+    if unknown:
+        raise ValueError(f"Unknown pricing fields: {unknown}")
+    updates, params = zip(*[(f"{k} = ?", v) for k, v in kwargs.items()])
+    query = "UPDATE pricing_rules SET " + ", ".join(updates) + " WHERE pricing_id = ?"
+    with get_connection() as conn:
+        conn.execute(query, (*params, pricing_id))
 
 
 # ── Bookings ─────────────────────────────────────────────────
@@ -410,3 +465,17 @@ def report_staff_bookings(cinema_id: int, year_month: str):
             ORDER BY bookings_made DESC""",
             (cinema_id, year_month)
         ).fetchall()
+
+
+def save_report(report_type: str, generated_by: int, data: str) -> int:
+    with get_connection() as conn:
+        cur = conn.execute(
+            "INSERT INTO reports (report_type, generated_by, data) VALUES (?, ?, ?)",
+            (report_type, generated_by, data)
+        )
+        return cur.lastrowid
+
+
+def get_reports():
+    with get_connection() as conn:
+        return conn.execute("SELECT * FROM reports ORDER BY generated_at DESC").fetchall()
