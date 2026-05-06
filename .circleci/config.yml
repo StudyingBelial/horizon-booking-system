@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   python: circleci/python@3.0.0
+  win: circleci/windows@5.0.0
 
 jobs:
   # ── 1. Quality Assurance ──────────────────────────────────────────────────
@@ -13,14 +14,14 @@ jobs:
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Lint with flake8
-          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.cci_pycache --max-line-length=127 --max-complexity=10
+          name: Lint with flake8 (Syntax & logic)
+          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - run:
-          name: Check Formatting with Black
+          name: Check Formatting (Black)
           command: black . --check
       - run:
-          name: Security Scan with Bandit
-          command: bandit -r . -ll --exclude .cci_pycache
+          name: Security Scan (Bandit)
+          command: bandit -r . -ll
 
   # ── 2. Testing ───────────────────────────────────────────────────────────
   test:
@@ -36,14 +37,19 @@ jobs:
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Run Pytest with Coverage
+          name: Run tests with Coverage
           command: |
-            mkdir -p test-results
-            xvfb-run pytest tests -ra -q --ignore=test_results.txt --cov=. --cov-report=xml --cov-report=term-missing --junitxml=test-results/junit.xml
-      - store_artifacts:
-          path: coverage.xml
-      - store_test_results:
-          path: test-results
+            xvfb-run pytest tests -ra -q --ignore=test_results.txt --cov=. --cov-report=xml --cov-report=term-missing
+      - run:
+          name: Upload coverage reports to Codecov
+          command: |
+            if [ -n "$CODECOV_TOKEN" ]; then
+              curl -Os https://uploader.codecov.io/latest/linux/codecov
+              chmod +x codecov
+              ./codecov -t ${CODECOV_TOKEN}
+            else
+              echo "CODECOV_TOKEN not found. Skipping upload."
+            fi
 
   # ── 3. Build (Linux) ─────────────────────────────────────────────────────
   build-linux:
@@ -59,17 +65,39 @@ jobs:
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Build Executable
+          name: Build Binary (Linux)
           command: |
-            pyinstaller --onefile --noconsole --name "HorizonBookingSystem-linux" --add-data "database:database" main.py
+            pyinstaller --onefile --noconsole --name "HorizonBookingSystem" --add-data "database:database" main.py
       - store_artifacts:
-          path: dist/HorizonBookingSystem-linux
+          path: dist/HorizonBookingSystem
       - persist_to_workspace:
           root: .
           paths:
-            - dist/HorizonBookingSystem-linux
+            - dist/HorizonBookingSystem
 
-  # ── 4. Release (on Tag) ──────────────────────────────────────────────────
+  # ── 3. Build (Windows) ───────────────────────────────────────────────────
+  build-windows:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: Install Python dependencies
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+      - run:
+          name: Build Binary (Windows)
+          command: |
+            pyinstaller --onefile --noconsole --name "HorizonBookingSystem" --add-data "database;database" main.py
+      - store_artifacts:
+          path: dist/HorizonBookingSystem.exe
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/HorizonBookingSystem.exe
+
+  # ── 4. Release ───────────────────────────────────────────────────────────
   release:
     docker:
       - image: cimg/base:stable
@@ -80,13 +108,16 @@ jobs:
       - run:
           name: Create GitHub Release
           command: |
-            # Check if GH_TOKEN is set
             if [ -z "$GH_TOKEN" ]; then
               echo "GH_TOKEN not found. Skipping release."
               exit 0
             fi
             TAG=$CIRCLE_TAG
-            gh release create "$TAG" dist/HorizonBookingSystem-linux --title "Release $TAG" --notes "Automated release from CircleCI"
+            gh release create "$TAG" \
+              dist/HorizonBookingSystem \
+              dist/HorizonBookingSystem.exe \
+              --title "Release $TAG" \
+              --notes "Automated release from CircleCI"
 
 workflows:
   version: 2
@@ -108,9 +139,16 @@ workflows:
           filters:
             tags:
               only: /^v.*/
+      - build-windows:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
       - release:
           requires:
             - build-linux
+            - build-windows
           filters:
             branches:
               ignore: /.*/
