@@ -13,13 +13,7 @@ class PricingService:
     """Centralises all price calculation logic, decoupled from UI and models."""
 
     def get_base_price(self, listing_id: int) -> float:
-        """
-        Return the base price for a listing (city + showType).
-        Includes time-of-day bracket overrides:
-        - Morning (before 12:00): £5.00
-        - Afternoon (12:00 - 17:00): £6.00
-        - Evening (17:00 onwards): £7.00
-        """
+        """Return the base price for a listing (city + showType + timeSlot)."""
         listing = Listing.get_by_id(listing_id)
         if not listing:
             return 0.0
@@ -28,23 +22,22 @@ class PricingService:
         if not cinema:
             return 0.0
 
-        rule = PricingRule.get(cinema.city, listing.showType)
-        base = rule.basePrice if rule else 0.0
+        time_slot = self._get_time_slot(listing.showTime)
+        rule = PricingRule.get(cinema.city, listing.showType, time_slot)
+        return rule.basePrice if rule else 0.0
 
-        # Time-of-day override for Standard shows
-        if listing.showType == "Standard":
-            try:
-                hour = int(listing.showTime.split(":")[0])
-                if hour < 12:
-                    return 5.00
-                elif hour < 17:
-                    return 6.00
-                else:
-                    return 7.00
-            except (ValueError, IndexError):
-                pass
-
-        return base
+    def _get_time_slot(self, time_str: str) -> str:
+        """Determines Morning/Afternoon/Evening slot from HH:MM string."""
+        try:
+            hour = int(time_str.split(":")[0])
+            if 8 <= hour < 12:
+                return "Morning"
+            elif 12 <= hour < 17:
+                return "Afternoon"
+            else:
+                return "Evening"
+        except (ValueError, IndexError):
+            return "Morning"  # Fallback
 
     def get_seat_price(self, listing_id: int, seat_id: int) -> float:
         """Return the price for a specific seat in a specific listing."""
@@ -66,7 +59,9 @@ class PricingService:
         cinema = Cinema.get_by_id(screen.cinemaId) if screen else None
         if not cinema:
             return {}
-        rule = PricingRule.get(cinema.city, listing.showType)
+
+        time_slot = self._get_time_slot(listing.showTime)
+        rule = PricingRule.get(cinema.city, listing.showType, time_slot)
         if not rule:
             return {}
         return {
@@ -76,6 +71,7 @@ class PricingService:
             "base": rule.basePrice,
             "city": cinema.city,
             "showType": listing.showType,
+            "timeSlot": time_slot,
         }
 
     def calc_total(self, listing_id: int, seat_ids: list) -> float:

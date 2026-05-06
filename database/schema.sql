@@ -64,8 +64,9 @@ CREATE TABLE IF NOT EXISTS pricing_rules (
     ruleId    INTEGER PRIMARY KEY AUTOINCREMENT,
     city      TEXT    NOT NULL,
     showType  TEXT    NOT NULL CHECK(showType IN ('Standard','IMAX','3D','Directors')),
+    timeSlot  TEXT    NOT NULL CHECK(timeSlot IN ('Morning','Afternoon','Evening')),
     basePrice REAL    NOT NULL,
-    UNIQUE(city, showType)
+    UNIQUE(city, showType, timeSlot)
 );
 
 -- ─── Bookings ────────────────────────────────────────────────────────────────

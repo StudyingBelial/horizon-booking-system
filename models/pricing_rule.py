@@ -16,10 +16,11 @@ class PricingRule:
     upperPremium = UPPER_GALLERY_PREMIUM  # 1.20
     vipPremium = VIP_PREMIUM  # 1.44
 
-    def __init__(self, ruleId: int, city: str, showType: str, basePrice: float):
-        self.ruleId = ruleId
-        self.city = city
-        self.showType = showType
+    def __init__(self, ruleId: int, city: str, showType: str, timeSlot: str, basePrice: float):
+        self.ruleId    = ruleId
+        self.city      = city
+        self.showType  = showType
+        self.timeSlot  = timeSlot
         self.basePrice = basePrice
 
     @staticmethod
@@ -27,10 +28,10 @@ class PricingRule:
         return PricingRule(**dict(row))
 
     @staticmethod
-    def get(city: str, show_type: str) -> "PricingRule":
+    def get(city: str, show_type: str, time_slot: str) -> "PricingRule":
         row = db.fetchone(
-            "SELECT * FROM pricing_rules WHERE city=? AND showType=?",
-            (city, show_type),
+            "SELECT * FROM pricing_rules WHERE city=? AND showType=? AND timeSlot=?",
+            (city, show_type, time_slot),
         )
         return PricingRule.from_row(row) if row else None
 
@@ -58,7 +59,5 @@ class PricingRule:
         return round(self.basePrice * self.vipPremium, 2)
 
     def __repr__(self):
-        return (
-            f"<PricingRule city={self.city} showType={self.showType} "
-            f"base=£{self.basePrice:.2f}>"
-        )
+        return (f"<PricingRule city={self.city} showType={self.showType} timeSlot={self.timeSlot} "
+                f"base=£{self.basePrice:.2f}>")
