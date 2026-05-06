@@ -5,7 +5,6 @@ controllers/admin_controller.py — Admin operations: manage listings, reports.
 from models.listing import Listing
 from models.film import Film
 from models.screen import Screen
-from models.cinema import Cinema
 from database.db_manager import db
 from services.validation_service import ValidationService, ValidationError
 from services.report_service import ReportService
@@ -73,7 +72,8 @@ class AdminController:
 
         values.append(listing_id)
         db.execute(
-            f"UPDATE listings SET {', '.join(sets)} WHERE listingId=?", tuple(values)
+            f"UPDATE listings SET {', '.join(sets)} WHERE listingId=?",  # nosec B608
+            tuple(values),
         )
         return Listing.get_by_id(listing_id)
 

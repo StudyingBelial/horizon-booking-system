@@ -6,7 +6,7 @@ from datetime import date
 from database.db_manager import db
 from utils.helpers import generate_booking_ref, now_str, format_currency
 from utils.constants import BookingStatus
-from config import CANCELLATION_REFUND_RATE, MIN_CANCEL_DAYS_BEFORE_SHOW
+from config import MIN_CANCEL_DAYS_BEFORE_SHOW
 
 
 class Booking:

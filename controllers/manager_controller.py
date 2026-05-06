@@ -4,7 +4,6 @@ controllers/manager_controller.py — Manager operations: cinemas, cities, staff
 
 from database.db_manager import db
 from models.cinema import Cinema
-from models.user import User
 from services.validation_service import ValidationService, ValidationError
 from services.report_service import ReportService
 from utils.helpers import hash_password

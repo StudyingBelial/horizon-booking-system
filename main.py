@@ -18,9 +18,9 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from database.db_manager import db
-from database.seed_data import seed
-from ui.login_ui import LoginUI
+from database.db_manager import db  # noqa: E402
+from database.seed_data import seed  # noqa: E402
+from ui.login_ui import LoginUI  # noqa: E402
 
 
 def main():
