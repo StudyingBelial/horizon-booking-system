@@ -73,7 +73,7 @@ class Report:
             query += " AND b.bookingDate LIKE ?"
             params.append(f"{month}%")
 
-        query += " GROUP BY c.cinemaId ORDER BY total_revenue DESC"
+        query += " GROUP BY c.city, c.name, c.cinemaId ORDER BY total_revenue DESC"
         rows = db.fetchall(query, tuple(params))
         return Report("revenue", [dict(r) for r in rows])
 
@@ -93,7 +93,7 @@ class Report:
             query += " AND b.bookingDate LIKE ?"
             params.append(f"{month}%")
 
-        query += " GROUP BY f.filmId ORDER BY total_revenue DESC"
+        query += " GROUP BY f.filmId, f.title ORDER BY total_revenue DESC"
         rows = db.fetchall(query, tuple(params))
         return Report("top_film", [dict(r) for r in rows])
 
@@ -112,7 +112,7 @@ class Report:
             query += " AND b.bookingDate LIKE ?"
             params.append(f"{month}%")
 
-        query += " GROUP BY u.userId ORDER BY num_bookings DESC"
+        query += " GROUP BY u.userId, u.username ORDER BY num_bookings DESC"
         rows = db.fetchall(query, tuple(params))
         return Report("staff_bookings", [dict(r) for r in rows])
 
@@ -142,7 +142,7 @@ class Report:
             JOIN cinemas c       ON s.cinemaId  = c.cinemaId
             LEFT JOIN bookings b ON l.listingId = b.listingId AND b.status='Confirmed'
             LEFT JOIN booked_seats bs ON b.bookingId = bs.bookingId
-            GROUP BY l.listingId
+            GROUP BY l.listingId, f.title, l.showDate, l.showTime, c.name, s.totalCapacity
             ORDER BY l.showDate DESC
             """)
         return Report("occupancy", [dict(r) for r in rows])
