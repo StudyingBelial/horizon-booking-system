@@ -23,6 +23,24 @@ class AdminUI(tk.Toplevel):
         self.title(f"Horizon Cinemas — Admin [{user.username}]")
         self.geometry("1100x740")
         self.configure(bg=PALETTE["bg"])
+        style = ttk.Style(self)
+        style.theme_use("clam")  # needed to allow field background customisation
+        style.configure(
+            "TCombobox",
+            fieldbackground=PALETTE["surface"],
+            background=PALETTE["surface"],
+            foreground=PALETTE["text"],
+            selectbackground=PALETTE["accent2"],
+            selectforeground="white",
+            arrowcolor=PALETTE["text"],
+            )
+        style.map(
+            "TCombobox",
+            fieldbackground=[("readonly", PALETTE["surface"])],
+            foreground=[("readonly", PALETTE["text"])],
+            selectbackground=[("readonly", PALETTE["accent2"])],
+            selectforeground=[("readonly", "white")],
+)
         self._build()
 
     def _build(self):
