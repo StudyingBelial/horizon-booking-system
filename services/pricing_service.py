@@ -5,11 +5,11 @@
 services/pricing_service.py — Calculates ticket prices for bookings.
 """
 
-from models.listing    import Listing
-from models.seat       import Seat
+from models.listing import Listing
+from models.seat import Seat
 from models.pricing_rule import PricingRule
-from models.screen     import Screen
-from models.cinema     import Cinema
+from models.screen import Screen
+from models.cinema import Cinema
 
 
 class PricingService:
@@ -73,15 +73,14 @@ class PricingService:
         if not rule:
             return {}
         return {
-            "Lower":  rule.getPrice("Lower"),
-            "Upper":  rule.getPrice("Upper"),
-            "VIP":    rule.getPrice("VIP"),
-            "base":   rule.basePrice,
-            "city":   cinema.city,
+            "Lower": rule.getPrice("Lower"),
+            "Upper": rule.getPrice("Upper"),
+            "VIP": rule.getPrice("VIP"),
+            "base": rule.basePrice,
+            "city": cinema.city,
             "showType": listing.showType,
         }
 
     def calc_total(self, listing_id: int, seat_ids: list) -> float:
         """Sum the prices for a list of seat IDs in a listing."""
         return round(sum(self.get_seat_price(listing_id, sid) for sid in seat_ids), 2)
-

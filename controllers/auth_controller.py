@@ -13,7 +13,7 @@ from utils.helpers import verify_password
 class AuthController:
     """Validates credentials and returns the appropriate User subclass."""
 
-    _current_user = None   # Module-level session holder
+    _current_user = None  # Module-level session holder
 
     @classmethod
     def login(cls, username: str, password: str):
@@ -24,9 +24,7 @@ class AuthController:
         if not username or not password:
             raise ValueError("Username and password are required.")
 
-        row = db.fetchone(
-            "SELECT * FROM users WHERE username=?", (username.strip(),)
-        )
+        row = db.fetchone("SELECT * FROM users WHERE username=?", (username.strip(),))
         if row is None:
             raise ValueError("Invalid username or password.")
 
@@ -57,7 +55,5 @@ class AuthController:
             raise PermissionError("Not logged in.")
         if user.role not in roles:
             raise PermissionError(
-                f"Access denied. Required role(s): {roles}. "
-                f"Your role: {user.role}"
+                f"Access denied. Required role(s): {roles}. " f"Your role: {user.role}"
             )
-

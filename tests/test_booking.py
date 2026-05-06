@@ -7,20 +7,21 @@ tests/test_booking.py — Unit tests for the booking flow.
 
 import unittest
 import sys, os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from database.db_manager import db
-from database.seed_data  import seed
+from database.seed_data import seed
 from controllers.booking_controller import BookingController
-from services.validation_service    import ValidationError
+from services.validation_service import ValidationError
 from models.listing import Listing
-from models.seat    import Seat
+from models.seat import Seat
 from models.booking import Booking
 
 
 def _get_first_listing_and_seats():
     listing = Listing.get_upcoming()[0]
-    seats   = listing.getAvailableSeats()
+    seats = listing.getAvailableSeats()
     return listing, seats
 
 
@@ -32,6 +33,7 @@ class TestBookingFlow(unittest.TestCase):
         db._connection = None
         db._instance._connection = None
         import sqlite3, os
+
         db._connection = sqlite3.connect(":memory:", check_same_thread=False)
         db._connection.row_factory = sqlite3.Row
         db._connection.execute("PRAGMA foreign_keys = ON")
@@ -44,7 +46,7 @@ class TestBookingFlow(unittest.TestCase):
         listing, seats = _get_first_listing_and_seats()
         self.assertTrue(len(seats) > 0, "Need at least one available seat")
         seat_ids = [seats[0].seatId]
-        result   = self.ctrl.create_booking(listing.listingId, seat_ids, staff_id=1)
+        result = self.ctrl.create_booking(listing.listingId, seat_ids, staff_id=1)
         self.assertTrue(result["success"])
         self.assertIn("HCB-", result["booking"].bookingRef)
         self.assertIn("HORIZON CINEMAS", result["receipt"])
@@ -87,4 +89,3 @@ class TestBookingFlow(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

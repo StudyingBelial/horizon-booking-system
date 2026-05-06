@@ -5,25 +5,31 @@
 controllers/admin_controller.py — Admin operations: manage listings, reports.
 """
 
-from models.listing  import Listing
-from models.film     import Film
-from models.screen   import Screen
-from models.cinema   import Cinema
+from models.listing import Listing
+from models.film import Film
+from models.screen import Screen
+from models.cinema import Cinema
 from database.db_manager import db
 from services.validation_service import ValidationService, ValidationError
-from services.report_service     import ReportService
+from services.report_service import ReportService
 
 
 class AdminController:
 
     def __init__(self):
         self._validation = ValidationService()
-        self._reports    = ReportService()
+        self._reports = ReportService()
 
     # ── Listings ──────────────────────────────────────────────────────────────
 
-    def add_listing(self, film_id: int, screen_id: int, show_date: str,
-                    show_time: str, show_type: str) -> Listing:
+    def add_listing(
+        self,
+        film_id: int,
+        screen_id: int,
+        show_date: str,
+        show_time: str,
+        show_type: str,
+    ) -> Listing:
         """Validate inputs then insert a new listing, return the Listing object."""
         self._validation.validate_listing_fields(
             film_id, screen_id, show_date, show_time, show_type
@@ -53,11 +59,11 @@ class AdminController:
 
         # Build update fields dynamically
         field_map = {
-            "film_id":    "filmId",
-            "screen_id":  "screenId",
-            "show_date":  "showDate",
-            "show_time":  "showTime",
-            "show_type":  "showType",
+            "film_id": "filmId",
+            "screen_id": "screenId",
+            "show_date": "showDate",
+            "show_time": "showTime",
+            "show_type": "showType",
         }
         sets, values = [], []
         for key, col in field_map.items():
@@ -95,19 +101,18 @@ class AdminController:
         return Film.get_all()
 
     def get_all_screens(self) -> list:
-        rows = db.fetchall(
-            """
+        rows = db.fetchall("""
             SELECT s.screenId, s.screenNumber, s.totalCapacity,
                    c.name as cinemaName, c.city
             FROM screens s
             JOIN cinemas c ON s.cinemaId = c.cinemaId
             ORDER BY c.city, c.name, s.screenNumber
-            """
-        )
+            """)
         return [dict(r) for r in rows]
 
-    def add_film(self, title: str, description: str, genre: str,
-                 age_rating: str, actors: str) -> int:
+    def add_film(
+        self, title: str, description: str, genre: str, age_rating: str, actors: str
+    ) -> int:
         """Insert a new film and return its ID."""
         self._validation.validate_non_empty(title, "Film title")
         cur = db.execute(
@@ -119,8 +124,9 @@ class AdminController:
 
     # ── Reports ───────────────────────────────────────────────────────────────
 
-    def generate_report(self, report_type: str, export: bool = False,
-                        filepath: str = None, **kwargs):
+    def generate_report(
+        self, report_type: str, export: bool = False, filepath: str = None, **kwargs
+    ):
         """Generate and optionally export a report."""
         if export:
             report, path = self._reports.generate_and_export(
@@ -131,4 +137,3 @@ class AdminController:
 
     def get_summary_stats(self) -> dict:
         return self._reports.get_summary_stats()
-

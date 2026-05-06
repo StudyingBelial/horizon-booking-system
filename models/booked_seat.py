@@ -9,12 +9,13 @@ from database.db_manager import db
 
 
 class BookedSeat:
-    def __init__(self, id: int, bookingId: int, seatId: int,
-                 ticketType: str, priceCharged: float):
-        self.id           = id
-        self.bookingId    = bookingId
-        self.seatId       = seatId
-        self.ticketType   = ticketType
+    def __init__(
+        self, id: int, bookingId: int, seatId: int, ticketType: str, priceCharged: float
+    ):
+        self.id = id
+        self.bookingId = bookingId
+        self.seatId = seatId
+        self.ticketType = ticketType
         self.priceCharged = priceCharged
 
     @staticmethod
@@ -29,8 +30,9 @@ class BookedSeat:
         return [BookedSeat.from_row(r) for r in rows]
 
     @staticmethod
-    def create(booking_id: int, seat_id: int,
-               ticket_type: str, price_charged: float) -> "BookedSeat":
+    def create(
+        booking_id: int, seat_id: int, ticket_type: str, price_charged: float
+    ) -> "BookedSeat":
         cur = db.execute(
             """
             INSERT INTO booked_seats(bookingId, seatId, ticketType, priceCharged)
@@ -39,18 +41,20 @@ class BookedSeat:
             (booking_id, seat_id, ticket_type, price_charged),
         )
         return BookedSeat(
-            id           = db.last_insert_id(cur),
-            bookingId    = booking_id,
-            seatId       = seat_id,
-            ticketType   = ticket_type,
-            priceCharged = price_charged,
+            id=db.last_insert_id(cur),
+            bookingId=booking_id,
+            seatId=seat_id,
+            ticketType=ticket_type,
+            priceCharged=price_charged,
         )
 
     def getSeat(self):
         from models.seat import Seat
+
         return Seat.get_by_id(self.seatId)
 
     def __repr__(self):
-        return (f"<BookedSeat bookingId={self.bookingId} seatId={self.seatId} "
-                f"type={self.ticketType} price=£{self.priceCharged:.2f}>")
-
+        return (
+            f"<BookedSeat bookingId={self.bookingId} seatId={self.seatId} "
+            f"type={self.ticketType} price=£{self.priceCharged:.2f}>"
+        )

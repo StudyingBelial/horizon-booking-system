@@ -22,8 +22,8 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from database.db_manager import db
-from database.seed_data  import seed
-from ui.login_ui         import LoginUI
+from database.seed_data import seed
+from ui.login_ui import LoginUI
 
 
 def main():
@@ -47,4 +47,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -8,10 +8,12 @@ tests/test_db_manager.py — Unit tests for the DB manager.
 import unittest
 import sys, os
 import sqlite3
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from database.db_manager import DBManager, db
 from config import BASE_DIR
+
 
 class TestDBManager(unittest.TestCase):
 
@@ -20,14 +22,18 @@ class TestDBManager(unittest.TestCase):
         DBManager._instance = None
         self.db_manager = DBManager()
         # Use an in-memory database
-        self.db_manager._connection = sqlite3.connect(":memory:", check_same_thread=False)
+        self.db_manager._connection = sqlite3.connect(
+            ":memory:", check_same_thread=False
+        )
         self.db_manager._connection.row_factory = sqlite3.Row
         self.db_manager._connection.execute("PRAGMA foreign_keys = ON")
-        
+
         # We need to test schema creation so we do not call init_schema() here directly in all tests
         # Create a simple table for general testing
-        self.db_manager.execute("CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT)")
-        
+        self.db_manager.execute(
+            "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY, name TEXT)"
+        )
+
     def tearDown(self):
         self.db_manager.close()
 
@@ -42,12 +48,12 @@ class TestDBManager(unittest.TestCase):
         # Using a fresh manager instance that doesn't have an injected in-memory db
         DBManager._instance = None
         manager = DBManager()
-        
+
         # mock DATABASE_PATH for this test to be in-memory or temporary
         # But connect hardcodes DATABASE_PATH from config. We will just test if close works.
         manager._connection = sqlite3.connect(":memory:", check_same_thread=False)
         self.assertIsNotNone(manager._connection)
-        
+
         manager.close()
         self.assertIsNone(manager._connection)
 
@@ -59,7 +65,9 @@ class TestDBManager(unittest.TestCase):
     def test_execute_and_fetchone(self):
         """Test execute and fetchone methods."""
         self.db_manager.execute("INSERT INTO test_table (name) VALUES (?)", ("Test 1",))
-        row = self.db_manager.fetchone("SELECT * FROM test_table WHERE name = ?", ("Test 1",))
+        row = self.db_manager.fetchone(
+            "SELECT * FROM test_table WHERE name = ?", ("Test 1",)
+        )
         self.assertIsNotNone(row)
         self.assertEqual(row["name"], "Test 1")
 
@@ -81,11 +89,17 @@ class TestDBManager(unittest.TestCase):
 
     def test_last_insert_id(self):
         """Test last_insert_id method."""
-        cursor = self.db_manager.execute("INSERT INTO test_table (name) VALUES (?)", ("Test ID",))
+        cursor = self.db_manager.execute(
+            "INSERT INTO test_table (name) VALUES (?)", ("Test ID",)
+        )
         last_id = self.db_manager.last_insert_id(cursor)
-        self.assertEqual(last_id, 1) # Assuming it's the first insert in the setUp's isolated db instance
-        
-        cursor2 = self.db_manager.execute("INSERT INTO test_table (name) VALUES (?)", ("Test ID 2",))
+        self.assertEqual(
+            last_id, 1
+        )  # Assuming it's the first insert in the setUp's isolated db instance
+
+        cursor2 = self.db_manager.execute(
+            "INSERT INTO test_table (name) VALUES (?)", ("Test ID 2",)
+        )
         last_id2 = self.db_manager.last_insert_id(cursor2)
         self.assertEqual(last_id2, 2)
 
@@ -96,16 +110,17 @@ class TestDBManager(unittest.TestCase):
         manager = DBManager()
         manager._connection = sqlite3.connect(":memory:", check_same_thread=False)
         manager._connection.row_factory = sqlite3.Row
-        
+
         # Call init_schema
         manager.init_schema()
-        
+
         # Verify that a table from schema.sql exists (e.g., 'users')
-        row = manager.fetchone("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+        row = manager.fetchone(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+        )
         self.assertIsNotNone(row)
         self.assertEqual(row["name"], "users")
 
 
 if __name__ == "__main__":
     unittest.main()
-

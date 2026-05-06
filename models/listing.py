@@ -9,14 +9,21 @@ from database.db_manager import db
 
 
 class Listing:
-    def __init__(self, listingId: int, filmId: int, screenId: int,
-                 showDate: str, showTime: str, showType: str):
+    def __init__(
+        self,
+        listingId: int,
+        filmId: int,
+        screenId: int,
+        showDate: str,
+        showTime: str,
+        showType: str,
+    ):
         self.listingId = listingId
-        self.filmId    = filmId
-        self.screenId  = screenId
-        self.showDate  = showDate   # 'YYYY-MM-DD'
-        self.showTime  = showTime   # 'HH:MM'
-        self.showType  = showType
+        self.filmId = filmId
+        self.screenId = screenId
+        self.showDate = showDate  # 'YYYY-MM-DD'
+        self.showTime = showTime  # 'HH:MM'
+        self.showType = showType
 
     @staticmethod
     def from_row(row) -> "Listing":
@@ -56,10 +63,12 @@ class Listing:
 
     def getFilm(self):
         from models.film import Film
+
         return Film.get_by_id(self.filmId)
 
     def getScreen(self):
         from models.screen import Screen
+
         return Screen.get_by_id(self.screenId)
 
     def getAvailableSeats(self):
@@ -70,6 +79,7 @@ class Listing:
     def calcTicketPrice(self, seat_type: str) -> float:
         """Calculate price for a seat type using the city's pricing rule."""
         from models.pricing_rule import PricingRule
+
         screen = self.getScreen()
         cinema = screen.getCinema() if screen else None
         if not cinema:
@@ -78,6 +88,7 @@ class Listing:
         return rule.getPrice(seat_type) if rule else 0.0
 
     def __repr__(self):
-        return (f"<Listing id={self.listingId} filmId={self.filmId} "
-                f"date={self.showDate} time={self.showTime}>")
-
+        return (
+            f"<Listing id={self.listingId} filmId={self.filmId} "
+            f"date={self.showDate} time={self.showTime}>"
+        )

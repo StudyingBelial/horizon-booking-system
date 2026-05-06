@@ -9,13 +9,20 @@ from database.db_manager import db
 
 
 class Screen:
-    def __init__(self, screenId: int, cinemaId: int, screenNumber: int,
-                 totalCapacity: int, lowerHallSeats: int, upperGallerySeats: int):
-        self.screenId          = screenId
-        self.cinemaId          = cinemaId
-        self.screenNumber      = screenNumber
-        self.totalCapacity     = totalCapacity
-        self.lowerHallSeats    = lowerHallSeats
+    def __init__(
+        self,
+        screenId: int,
+        cinemaId: int,
+        screenNumber: int,
+        totalCapacity: int,
+        lowerHallSeats: int,
+        upperGallerySeats: int,
+    ):
+        self.screenId = screenId
+        self.cinemaId = cinemaId
+        self.screenNumber = screenNumber
+        self.totalCapacity = totalCapacity
+        self.lowerHallSeats = lowerHallSeats
         self.upperGallerySeats = upperGallerySeats
 
     @staticmethod
@@ -38,6 +45,7 @@ class Screen:
     def getAvailableSeats(self, listing_id: int):
         """Return Seat objects not already booked for the given listing."""
         from models.seat import Seat
+
         rows = db.fetchall(
             """
             SELECT s.* FROM seats s
@@ -67,9 +75,11 @@ class Screen:
 
     def getCinema(self):
         from models.cinema import Cinema
+
         return Cinema.get_by_id(self.cinemaId)
 
     def __repr__(self):
-        return (f"<Screen id={self.screenId} cinemaId={self.cinemaId} "
-                f"number={self.screenNumber}>")
-
+        return (
+            f"<Screen id={self.screenId} cinemaId={self.cinemaId} "
+            f"number={self.screenNumber}>"
+        )

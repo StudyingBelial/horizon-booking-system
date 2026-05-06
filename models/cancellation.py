@@ -14,13 +14,19 @@ from config import CANCELLATION_REFUND_RATE, MIN_CANCEL_DAYS_BEFORE_SHOW
 class Cancellation:
     chargeRate = CANCELLATION_REFUND_RATE  # 0.50 — half is kept as charge
 
-    def __init__(self, cancellationId: int, bookingRef: str,
-                 cancelDate: str, refundAmount: float, chargeRate: float):
+    def __init__(
+        self,
+        cancellationId: int,
+        bookingRef: str,
+        cancelDate: str,
+        refundAmount: float,
+        chargeRate: float,
+    ):
         self.cancellationId = cancellationId
-        self.bookingRef     = bookingRef
-        self.cancelDate     = cancelDate
-        self.refundAmount   = refundAmount
-        self.chargeRate     = chargeRate
+        self.bookingRef = bookingRef
+        self.cancelDate = cancelDate
+        self.refundAmount = refundAmount
+        self.chargeRate = chargeRate
 
     # ── Factories ─────────────────────────────────────────────────────────────
 
@@ -38,7 +44,7 @@ class Cancellation:
     @staticmethod
     def create(booking_ref: str, total_cost: float) -> "Cancellation":
         """Persist a new cancellation record and return it."""
-        refund      = Cancellation.calcRefundStatic(total_cost)
+        refund = Cancellation.calcRefundStatic(total_cost)
         cancel_date = now_str()
         cur = db.execute(
             """
@@ -48,11 +54,11 @@ class Cancellation:
             (booking_ref, cancel_date, refund, Cancellation.chargeRate),
         )
         return Cancellation(
-            cancellationId = db.last_insert_id(cur),
-            bookingRef     = booking_ref,
-            cancelDate     = cancel_date,
-            refundAmount   = refund,
-            chargeRate     = Cancellation.chargeRate,
+            cancellationId=db.last_insert_id(cur),
+            bookingRef=booking_ref,
+            cancelDate=cancel_date,
+            refundAmount=refund,
+            chargeRate=Cancellation.chargeRate,
         )
 
     # ── Domain logic ──────────────────────────────────────────────────────────
@@ -71,14 +77,16 @@ class Cancellation:
         Cancellation allowed ONLY if showDate > today + MIN_CANCEL_DAYS_BEFORE_SHOW.
         """
         from models.listing import Listing
+
         listing = Listing.get_by_id(booking.listingId)
         if not listing:
             return False
-        show  = date.fromisoformat(listing.showDate)
+        show = date.fromisoformat(listing.showDate)
         delta = (show - date.today()).days
         return delta > MIN_CANCEL_DAYS_BEFORE_SHOW
 
     def __repr__(self):
-        return (f"<Cancellation ref={self.bookingRef} "
-                f"refund=£{self.refundAmount:.2f} date={self.cancelDate}>")
-
+        return (
+            f"<Cancellation ref={self.bookingRef} "
+            f"refund=£{self.refundAmount:.2f} date={self.cancelDate}>"
+        )
