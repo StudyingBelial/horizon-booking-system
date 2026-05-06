@@ -12,15 +12,15 @@ from utils.constants import Role
 PALETTE = {
     "bg":       "#0F0F1A",   # deep navy-black
     "surface":  "#1A1A2E",   # card background
-    "accent":   "#E94560",   # coral-red accent
-    "accent2":  "#0F3460",   # deep blue accent
+    "accent":   "#00A8FF",   # vibrant electric blue
+    "accent2":  "#007BFF",   # deeper blue accent
     "text":     "#E0E0E0",   # primary text
     "muted":    "#7A7A9A",   # secondary text
     "success":  "#2ECC71",
     "warning":  "#F39C12",
     "border":   "#2A2A4A",
 }
-
+# ... existing font constants ...
 FONT_TITLE  = ("Helvetica", 22, "bold")
 FONT_SUB    = ("Helvetica", 11)
 FONT_LABEL  = ("Helvetica", 10)
@@ -53,14 +53,14 @@ def apply_dark_style(root):
         font=FONT_BUTTON, padding=(12, 6), relief="flat",
     )
     style.map("Accent.TButton",
-        background=[("active", "#C0392B"), ("pressed", "#922B21")],
+        background=[("active", PALETTE["accent2"]), ("pressed", "#0056b3")],
     )
     style.configure("TButton",
         background=PALETTE["accent2"], foreground="white",
         font=FONT_BUTTON, padding=(10, 5), relief="flat",
     )
     style.map("TButton",
-        background=[("active", "#1A4A80"), ("pressed", "#0A2A50")],
+        background=[("active", "#0056b3"), ("pressed", "#004085")],
     )
     style.configure("TCombobox",
         fieldbackground=PALETTE["surface"], background=PALETTE["surface"],
@@ -99,7 +99,7 @@ class LoginUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Horizon Cinemas — Login")
-        self.geometry("460x640")
+        self.geometry("460x660")
         self.resizable(False, False)
         self.configure(bg=PALETTE["bg"])
         apply_dark_style(self)
@@ -131,23 +131,22 @@ class LoginUI(tk.Tk):
 
         self._role_btns = {}
         for name, icon, uname in roles:
-            btn_frame = tk.Frame(role_container, bg=PALETTE["bg"])
-            btn_frame.pack(side="left", expand=True, fill="both", padx=4)
+            # Using a Frame + Label approach for better color control on macOS
+            f = tk.Frame(role_container, bg=PALETTE["accent2"], padx=1, pady=1)
+            f.pack(side="left", expand=True, fill="both", padx=4)
 
-            # Enhanced role buttons
-            b = tk.Button(btn_frame, 
-                          text=f"{icon}\n{name}",
-                          font=("Helvetica", 10, "bold"),
-                          bg=PALETTE["surface"], fg=PALETTE["text"],
-                          activebackground=PALETTE["accent"], activeforeground="white",
-                          relief="flat", bd=0, padx=10, pady=10,
-                          cursor="hand2",
-                          command=lambda u=uname: self._select_role(u))
+            b = tk.Label(f, 
+                        text=f"{icon}\n{name}",
+                        font=("Helvetica", 10, "bold"),
+                        bg=PALETTE["surface"], fg=PALETTE["text"],
+                        padx=10, pady=10,
+                        cursor="hand2")
             b.pack(expand=True, fill="both")
             
-            # Simple hover effect
-            b.bind("<Enter>", lambda e, btn=b: btn.config(bg=PALETTE["accent2"]))
-            b.bind("<Leave>", lambda e, btn=b: btn.config(bg=PALETTE["surface"]))
+            # Hover & Click events
+            b.bind("<Enter>", lambda e, lbl=b: lbl.config(bg=PALETTE["accent2"], fg="white"))
+            b.bind("<Leave>", lambda e, lbl=b: lbl.config(bg=PALETTE["surface"], fg=PALETTE["text"]))
+            b.bind("<Button-1>", lambda e, u=uname: self._select_role(u))
             
             self._role_btns[name] = b
 
@@ -180,14 +179,19 @@ class LoginUI(tk.Tk):
         self._password.pack(fill="x", pady=(2, 16), ipady=6)
         self._password.bind("<Return>", lambda e: self._login())
 
-        # Login button - Enhanced visibility
-        btn = tk.Button(inner, text="SIGN IN →",
-                        font=("Helvetica", 12, "bold"),
-                        bg="#FF2E63", fg="white", # Brighter coral/pink
-                        activebackground="#E94560", activeforeground="white",
-                        relief="flat", cursor="hand2",
-                        command=self._login)
-        btn.pack(fill="x", ipady=10)
+        # Login button - Custom Frame+Label for consistent Blue
+        btn_frame = tk.Frame(inner, bg=PALETTE["accent"])
+        btn_frame.pack(fill="x", ipady=0)
+        
+        btn = tk.Label(btn_frame, text="SIGN IN →",
+                      font=("Helvetica", 12, "bold"),
+                      bg=PALETTE["accent"], fg="white",
+                      cursor="hand2", pady=12)
+        btn.pack(fill="x")
+        
+        btn.bind("<Enter>", lambda e: btn.config(bg=PALETTE["accent2"]))
+        btn.bind("<Leave>", lambda e: btn.config(bg=PALETTE["accent"]))
+        btn.bind("<Button-1>", lambda e: self._login())
 
         # Status label
         self._status = tk.Label(inner, text="", font=FONT_LABEL,
