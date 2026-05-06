@@ -165,27 +165,30 @@ class LoginUI(tk.Tk):
             fg=PALETTE["muted"],
         ).pack()
 
-        # ── Role Selection ───────────────────────────────────────────────────
+        # ── Role Selection Dropdown ──────────────────────────────────────────
         role_container = tk.Frame(self, bg=PALETTE["bg"])
         role_container.pack(pady=(20, 0), padx=48, fill="x")
 
-        roles = [
-            ("Admin", "🛡️", "admin"),
-            ("Manager", "💼", "manager"),
-            ("Staff", "🎟️", "staff1"),
-        ]
+        tk.Label(
+            role_container,
+            text="Select Portal:",
+            font=FONT_LABEL,
+            bg=PALETTE["bg"],
+            fg=PALETTE["muted"],
+        ).pack(side="left")
 
-        self._role_btns = {}
-        for name, icon, uname in roles:
-            # Using ttk.Button with the Accent style for native Windows feel
-            b = ttk.Button(
-                role_container,
-                text=f"{icon}  {name}",
-                style="Accent.TButton",
-                command=lambda u=uname: self._select_role(u),
-            )
-            b.pack(side="left", expand=True, fill="both", padx=4)
-            self._role_btns[name] = b
+        self._role_var = tk.StringVar()
+        self._role_dropdown = ttk.Combobox(
+            role_container,
+            textvariable=self._role_var,
+            values=["Admin Portal", "Staff Portal", "Manager Portal"],
+            state="readonly",
+            width=20,
+        )
+        self._role_dropdown.pack(side="left", padx=10, fill="x", expand=True)
+        self._role_dropdown.bind("<<ComboboxSelected>>", self._on_role_dropdown_change)
+        
+
 
         # ── Card ──────────────────────────────────────────────────────────────
         card = tk.Frame(
@@ -254,23 +257,22 @@ class LoginUI(tk.Tk):
         # ── Footer ────────────────────────────────────────────────────────────
         tk.Label(
             self,
-            text="Select a portal to pre-fill or enter credentials manually",
+            text="Choose a portal from the dropdown to pre-fill credentials",
             font=("Helvetica", 8),
             bg=PALETTE["bg"],
             fg=PALETTE["muted"],
         ).pack(pady=(10, 10))
 
-    def _select_role(self, username):
-        """Pre-fill username and focus password when a role is clicked."""
+    def _on_role_dropdown_change(self, event=None):
+        """User selected a portal; we just clear fields and focus for manual entry."""
         self._username.delete(0, tk.END)
-        self._username.insert(0, username)
-
-        # We no longer pre-fill the password for security/design preference.
         self._password.delete(0, tk.END)
-        self._password.focus()
+        self._username.focus()
+        selection = self._role_var.get()
         self._status.config(
-            text=f"Selected {username.capitalize()} Portal", fg=PALETTE["muted"]
+            text=f"Switched to {selection}", fg=PALETTE["muted"]
         )
+
 
     def _login(self):
         username = self._username.get()

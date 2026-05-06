@@ -85,8 +85,15 @@ class BookingUI(tk.Toplevel):
             fg="#AACCFF",
         ).pack(side="right", padx=(16, 8))
 
+        # Navigation buttons for hierarchy
+        if self.user.role == "Admin":
+            self._btn(bar, "🛠 Admin View", self._open_admin_view, bg=PALETTE["accent"], side="right")
+            self._btn(bar, "💼 Manager View", self._open_manager_view, bg=PALETTE["accent"], side="right")
+        elif self.user.role == "Manager":
+            self._btn(bar, "💼 Manager View", self._open_manager_view, bg=PALETTE["accent"], side="right")
+
         # Custom Logout button
-        log_b = tk.Button(
+        tk.Button(
             bar,
             text="Logout 🚪",
             font=("Helvetica", 9, "bold"),
@@ -97,8 +104,7 @@ class BookingUI(tk.Toplevel):
             activebackground="#C0392B",
             activeforeground="white",
             command=lambda: self.master.show_login(self),
-        )
-        log_b.pack(side="right", padx=16, pady=4)
+        ).pack(side="right", padx=16, pady=4)
 
         # ── Main paned layout ────────────────────────────────────────────────
         paned = tk.PanedWindow(
@@ -638,5 +644,12 @@ class BookingUI(tk.Toplevel):
 
     def _open_cancel(self):
         from ui.cancel_ui import CancelUI
-
         CancelUI(self)
+
+    def _open_admin_view(self):
+        from ui.admin_ui import AdminUI
+        AdminUI(self.master, self.user)
+
+    def _open_manager_view(self):
+        from ui.manager_ui import ManagerUI
+        ManagerUI(self.master, self.user)
