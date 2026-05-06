@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 ui/booking_ui.py — Full booking interface for BookingStaff (and Admin/Manager).
 
@@ -50,15 +53,11 @@ class BookingUI(tk.Toplevel):
                  bg=PALETTE["accent2"], fg="#AACCFF").pack(side="right", padx=(16, 8))
 
         # Custom Logout button
-        log_f = tk.Frame(bar, bg="#E94560", padx=0, pady=0)
-        log_f.pack(side="right", padx=16)
-        log_l = tk.Label(log_f, text="Logout 🚪", font=("Helvetica", 9, "bold"),
-                         bg="#E94560", fg="white", padx=12, pady=4,
-                         cursor="hand2")
-        log_l.pack()
-        log_l.bind("<Enter>", lambda e: log_l.config(bg="#C0392B"))
-        log_l.bind("<Leave>", lambda e: log_l.config(bg="#E94560"))
-        log_l.bind("<Button-1>", lambda e: self.master.show_login(self))
+        log_b = tk.Button(bar, text="Logout 🚪", font=("Helvetica", 9, "bold"),
+                          bg="#E94560", fg="white", cursor="hand2", relief="flat",
+                          activebackground="#C0392B", activeforeground="white",
+                          command=lambda: self.master.show_login(self))
+        log_b.pack(side="right", padx=16, pady=4)
 
         # ── Main paned layout ────────────────────────────────────────────────
         paned = tk.PanedWindow(self, orient="horizontal",
@@ -75,18 +74,14 @@ class BookingUI(tk.Toplevel):
         self._build_seat_panel(right)
 
     def _btn(self, parent, text, command, bg=None, side="top", pady=2):
-        """Helper to create custom Frame+Label buttons for macOS consistency."""
+        """Helper to create native Windows buttons."""
         color = bg if bg else PALETTE["accent"]
-        f = tk.Frame(parent, bg=color, padx=0, pady=0)
-        f.pack(side=side, fill="x", pady=pady)
-        l = tk.Label(f, text=text, font=FONT_BUTTON,
-                     bg=color, fg="white", padx=12, pady=10,
-                     cursor="hand2")
-        l.pack(fill="x")
-        l.bind("<Enter>", lambda e: l.config(bg=PALETTE["accent2"]))
-        l.bind("<Leave>", lambda e: l.config(bg=color))
-        l.bind("<Button-1>", lambda e: command())
-        return f
+        b = tk.Button(parent, text=text, command=command, font=FONT_BUTTON,
+                      bg=color, fg="white", cursor="hand2", relief="flat",
+                      activebackground=PALETTE["accent2"], activeforeground="white",
+                      padx=8, pady=6)
+        b.pack(side=side, fill="x", pady=pady)
+        return b
 
     def _build_selection_panel(self, parent):
         """Left panel: film, cinema, listing selection + price info."""
@@ -349,23 +344,24 @@ class BookingUI(tk.Toplevel):
 
                 available = seat.seatId in avail_ids
                 bg = base_color if available else "#5A5A5A"
-                
-                # Using a Label instead of Button for consistent macOS visibility
-                btn = tk.Label(
+                # Windows natively supports styling on tk.Button, providing a better native click feel.
+                btn = tk.Button(
                     row_frame,
                     text=seat.seatNumber,
                     font=("Helvetica", 7, "bold"),
                     bg=bg, fg="white",
-                    width=5, height=1,
-                    cursor="hand2" if available else "arrow"
+                    width=4, height=1,
+                    cursor="hand2" if available else "arrow",
+                    relief="raised" if available else "sunken"
                 )
                 btn.pack(side="left", padx=1, pady=1)
                 
                 if available:
-                    btn.bind("<Button-1>", lambda e, s=seat: self._toggle_seat(s))
+                    # using native command allows the button to sink visually when clicked
+                    btn.config(command=lambda s=seat: self._toggle_seat(s))
                     self._seat_btns[seat.seatId] = (btn, seat, base_color)
                 else:
-                    btn.config(fg="#888888") # Muted text for booked seats
+                    btn.config(fg="#888888", state="disabled") # Native disabled state
 
         # Screen label at bottom
         tk.Label(self._seat_inner,
@@ -464,3 +460,4 @@ class BookingUI(tk.Toplevel):
     def _open_cancel(self):
         from ui.cancel_ui import CancelUI
         CancelUI(self)
+

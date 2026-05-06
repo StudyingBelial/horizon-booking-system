@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 ui/cancel_ui.py — Booking cancellation interface.
 """
@@ -50,11 +53,8 @@ class CancelUI(tk.Toplevel):
                           font=FONT_INPUT)
         entry.pack(side="left", fill="x", expand=True, ipady=6)
         entry.bind("<Return>", lambda e: self._lookup())
-
-        tk.Button(ref_frame, text="Look Up",
-                  font=FONT_BUTTON, bg=PALETTE["accent2"],
-                  fg="white", relief="flat", cursor="hand2",
-                  command=self._lookup).pack(side="left", padx=(8, 0), pady=0, ipady=6)
+        self._inner_card = inner
+        self._btn(ref_frame, "Look Up", self._lookup, bg=PALETTE["accent2"])
 
         # Info frame (shown after lookup)
         self._info_frame = tk.Frame(inner, bg=PALETTE["surface"])
@@ -66,13 +66,85 @@ class CancelUI(tk.Toplevel):
                                 wraplength=440, justify="left")
         self._status.pack(anchor="w", pady=(12, 0))
 
-        # Confirm cancel button (hidden until eligible)
-        self._cancel_btn = tk.Button(
-            inner, text="✅  Confirm Cancellation",
-            font=FONT_BUTTON, bg=PALETTE["accent"],
-            fg="white", relief="flat", cursor="hand2",
-            command=self._confirm_cancel,
-        )
+    def _btn(self, parent, text, command, bg=None, side="left", padx=4):
+        """Helper to create native Windows buttons."""
+        color = bg if bg else PALETTE["accent"]
+        b = tk.Button(parent, text=text, command=command, font=FONT_BUTTON,
+                      bg=color, fg="white", cursor="hand2", relief="flat",
+                      activebackground=PALETTE["accent2"], activeforeground="white",
+                      padx=8, pady=2)
+        b.pack(side=side, padx=padx)
+        return b
+
+    def _lookup(self):
+        for w in self._info_frame.winfo_children():
+            w.destroy()
+        if hasattr(self, "_cancel_btn_f"):
+            self._cancel_btn_f.pack_forget()
+        self._status.config(text="")
+
+        ref = self._ref_var.get().strip().upper()
+        if not ref:
+            self._status.config(text="Please enter a booking reference.",
+                                fg=PALETTE["accent"])
+            return
+
+        booking = self._ctrl.lookup_booking(ref)
+        if not booking:
+            self._status.config(
+                text=f"No booking found for reference: {ref}",
+                fg=PALETTE["accent"])
+            return
+
+        self._booking = booking
+
+        # Display booking details
+        listing = booking.getListing()
+        film    = listing.getFilm() if listing else None
+
+        rows = [
+            ("Booking Ref",  booking.bookingRef),
+            ("Film",         film.title if film else "N/A"),
+            ("Date",         listing.showDate if listing else "N/A"),
+            ("Time",         listing.showTime if listing else "N/A"),
+            ("Show Type",    listing.showType if listing else "N/A"),
+            ("Tickets",      str(booking.numTickets)),
+            ("Total Cost",   f"£{booking.totalCost:.2f}"),
+            ("Status",       booking.status),
+        ]
+
+        for i, (label, value) in enumerate(rows):
+            tk.Label(self._info_frame, text=f"{label}:",
+                     font=("Helvetica", 9, "bold"),
+                     bg=PALETTE["surface"], fg=PALETTE["muted"],
+                     anchor="w").grid(row=i, column=0, sticky="w", pady=1)
+            color = PALETTE["success"] if value == "Confirmed" else PALETTE["accent"]
+            tk.Label(self._info_frame, text=value,
+                     font=("Helvetica", 9),
+                     bg=PALETTE["surface"],
+                     fg=color if label == "Status" else PALETTE["text"],
+                     anchor="w").grid(row=i, column=1, sticky="w", padx=(16, 0), pady=1)
+
+        # Check eligibility
+        eligible = booking.isEligibleCancel()
+        refund   = Cancellation.calcRefundStatic(booking.totalCost)
+
+        if eligible:
+            self._status.config(
+                text=f"✅ Eligible for cancellation. Refund: £{refund:.2f}",
+                fg=PALETTE["success"])
+            if not hasattr(self, "_cancel_btn_f"):
+                self._cancel_btn_f = self._btn(self._inner_card, "✅  Confirm Cancellation", 
+                                              self._confirm_cancel, bg=PALETTE["accent"],
+                                              side="top")
+            self._cancel_btn_f.pack(fill="x", pady=(12, 0))
+        else:
+            if booking.status == "Cancelled":
+                msg = "⚠️ This booking has already been cancelled."
+            else:
+                msg = ("❌ Not eligible: cancellations are only allowed "
+                       "more than 1 day before the show date.")
+            self._status.config(text=msg, fg=PALETTE["warning"])
 
     def _lookup(self):
         for w in self._info_frame.winfo_children():
@@ -158,3 +230,4 @@ class CancelUI(tk.Toplevel):
                                 fg=PALETTE["success"])
         except Exception as e:
             messagebox.showerror("Error", str(e))
+

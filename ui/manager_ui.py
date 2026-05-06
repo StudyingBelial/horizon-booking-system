@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 ui/manager_ui.py — Manager dashboard: cinemas, cities, staff, pricing, reports.
 Managers inherit all Admin capabilities plus system configuration.
@@ -24,25 +27,24 @@ class ManagerUI(tk.Toplevel):
 
     def _build(self):
         # Top bar
-        bar = tk.Frame(self, bg="#0F3460", pady=8)
+        bar = tk.Frame(self, bg=PALETTE["accent2"], pady=8)
         bar.pack(fill="x")
         tk.Label(bar, text="👑  Manager Dashboard",
                  font=("Helvetica", 13, "bold"),
-                 bg="#0F3460", fg="white").pack(side="left", padx=16)
+                 bg=PALETTE["accent2"], fg="white").pack(side="left", padx=16)
         tk.Label(bar, text=f"{self.user.username}  [{self.user.role}]",
                  font=FONT_LABEL,
-                 bg="#0F3460", fg="#AACCFF").pack(side="right", padx=(16, 8))
+                 bg=PALETTE["accent2"], fg="#AACCFF").pack(side="right", padx=(16, 8))
+
+        # Admin View button
+        self._btn(bar, "🛠 Admin View", self._open_admin_view, bg=PALETTE["accent"], side="right")
 
         # Custom Logout button
-        log_f = tk.Frame(bar, bg="#E94560", padx=0, pady=0)
-        log_f.pack(side="right", padx=16)
-        log_l = tk.Label(log_f, text="Logout 🚪", font=("Helvetica", 9, "bold"),
-                         bg="#E94560", fg="white", padx=12, pady=4,
-                         cursor="hand2")
-        log_l.pack()
-        log_l.bind("<Enter>", lambda e: log_l.config(bg="#C0392B"))
-        log_l.bind("<Leave>", lambda e: log_l.config(bg="#E94560"))
-        log_l.bind("<Button-1>", lambda e: self.master.show_login(self))
+        log_b = tk.Button(bar, text="Logout 🚪", font=("Helvetica", 9, "bold"),
+                          bg="#E94560", fg="white", cursor="hand2", relief="flat",
+                          activebackground="#C0392B", activeforeground="white",
+                          command=lambda: self.master.show_login(self))
+        log_b.pack(side="right", padx=16, pady=4)
 
         # Stats strip
         self._build_stats_strip()
@@ -97,18 +99,14 @@ class ManagerUI(tk.Toplevel):
     # ═══════════════════════════════════════════════════════════════════════════
 
     def _btn(self, parent, text, command, bg=None, side="left", padx=4):
-        """Helper to create custom Frame+Label buttons for macOS consistency."""
+        """Helper to create native Windows buttons."""
         color = bg if bg else PALETTE["accent"]
-        f = tk.Frame(parent, bg=color, padx=0, pady=0)
-        f.pack(side=side, padx=padx)
-        l = tk.Label(f, text=text, font=FONT_BUTTON,
-                     bg=color, fg="white", padx=12, pady=6,
-                     cursor="hand2")
-        l.pack()
-        l.bind("<Enter>", lambda e: l.config(bg=PALETTE["accent2"]))
-        l.bind("<Leave>", lambda e: l.config(bg=color))
-        l.bind("<Button-1>", lambda e: command())
-        return f
+        b = tk.Button(parent, text=text, command=command, font=FONT_BUTTON,
+                      bg=color, fg="white", cursor="hand2", relief="flat",
+                      activebackground=PALETTE["accent2"], activeforeground="white",
+                      padx=8, pady=2)
+        b.pack(side=side, padx=padx)
+        return b
 
     def _build_cinemas_tab(self):
         parent = self._tab_cinemas
@@ -309,9 +307,24 @@ class ManagerUI(tk.Toplevel):
         tk.Label(ctrl_frame, text="Report Type:", font=FONT_LABEL,
                  bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(side="left")
         self._report_var = tk.StringVar(value="bookings")
-        for rt in ["bookings", "revenue", "cancellations", "occupancy"]:
-            ttk.Radiobutton(ctrl_frame, text=rt.capitalize(),
-                            variable=self._report_var, value=rt).pack(side="left", padx=8)
+        
+        report_types = [
+            ("Bookings", "bookings"),
+            ("Revenue", "revenue"),
+            ("Cancellations", "cancellations"),
+            ("Occupancy", "occupancy"),
+            ("Top Film", "top_film"),
+            ("Staff", "staff_bookings")
+        ]
+        for label, val in report_types:
+            ttk.Radiobutton(ctrl_frame, text=label,
+                            variable=self._report_var, value=val).pack(side="left", padx=8)
+
+        # Month filter
+        tk.Label(ctrl_frame, text="Month (YYYY-MM):", font=FONT_LABEL,
+                 bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(side="left", padx=(16, 4))
+        self._month_var = tk.StringVar()
+        ttk.Entry(ctrl_frame, textvariable=self._month_var, width=10).pack(side="left")
 
         self._btn(ctrl_frame, "▶ Generate", self._generate_report, bg="#2ECC71")
 
@@ -325,7 +338,8 @@ class ManagerUI(tk.Toplevel):
 
     def _generate_report(self):
         rtype  = self._report_var.get()
-        report = self._admin.generate_report(rtype)
+        month  = self._month_var.get() or None
+        report = self._admin.generate_report(rtype, month=month)
         tree   = self._report_tree
 
         if not report.data:
@@ -340,6 +354,10 @@ class ManagerUI(tk.Toplevel):
         tree.delete(*tree.get_children())
         for row in report.data:
             tree.insert("", "end", values=list(row.values()))
+
+    def _open_admin_view(self):
+        from ui.admin_ui import AdminUI
+        AdminUI(self.master, self.user)
 
     # ── Helper ─────────────────────────────────────────────────────────────────
 
@@ -416,3 +434,4 @@ class _FormDialog(tk.Toplevel):
             self.destroy()
         except Exception as e:
             self._status.config(text=str(e))
+
