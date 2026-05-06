@@ -245,10 +245,14 @@ class LoginUI(tk.Tk):
 
         win.protocol("WM_DELETE_WINDOW", lambda: self._on_child_close(win))
 
-    def _on_child_close(self, win):
+    def show_login(self, win):
+        """Called by dashboards to return to the login screen."""
         AuthController.logout()
-        win.destroy()
+        if win: win.destroy()
         self._username.delete(0, tk.END)
         self._password.delete(0, tk.END)
         self._status.config(text="")
         self.deiconify()
+
+    def _on_child_close(self, win):
+        self.show_login(win)

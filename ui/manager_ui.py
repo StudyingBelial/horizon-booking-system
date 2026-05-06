@@ -31,7 +31,18 @@ class ManagerUI(tk.Toplevel):
                  bg="#0F3460", fg="white").pack(side="left", padx=16)
         tk.Label(bar, text=f"{self.user.username}  [{self.user.role}]",
                  font=FONT_LABEL,
-                 bg="#0F3460", fg="#AACCFF").pack(side="right", padx=16)
+                 bg="#0F3460", fg="#AACCFF").pack(side="right", padx=(16, 8))
+
+        # Custom Logout button
+        log_f = tk.Frame(bar, bg="#E94560", padx=0, pady=0)
+        log_f.pack(side="right", padx=16)
+        log_l = tk.Label(log_f, text="Logout 🚪", font=("Helvetica", 9, "bold"),
+                         bg="#E94560", fg="white", padx=12, pady=4,
+                         cursor="hand2")
+        log_l.pack()
+        log_l.bind("<Enter>", lambda e: log_l.config(bg="#C0392B"))
+        log_l.bind("<Leave>", lambda e: log_l.config(bg="#E94560"))
+        log_l.bind("<Button-1>", lambda e: self.master.show_login(self))
 
         # Stats strip
         self._build_stats_strip()
