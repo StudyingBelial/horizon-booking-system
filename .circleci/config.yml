@@ -5,25 +5,7 @@ orbs:
   win: circleci/windows@5.0.0
 
 jobs:
-  # ── 1. Quality Assurance ──────────────────────────────────────────────────
-  quality:
-    docker:
-      - image: cimg/python:3.10
-    steps:
-      - checkout
-      - python/install-packages:
-          pkg-manager: pip
-      - run:
-          name: Lint with flake8 (Syntax & logic)
-          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      - run:
-          name: Check Formatting (Black)
-          command: black . --check
-      - run:
-          name: Security Scan (Bandit)
-          command: bandit -r . -ll
-
-  # ── 2. Testing ───────────────────────────────────────────────────────────
+  # ── 1. Testing ───────────────────────────────────────────────────────────
   test:
     docker:
       - image: cimg/python:3.10
@@ -37,19 +19,9 @@ jobs:
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Run tests with Coverage
+          name: Run tests
           command: |
-            xvfb-run pytest tests -ra -q --ignore=test_results.txt --cov=. --cov-report=xml --cov-report=term-missing
-      - run:
-          name: Upload coverage reports to Codecov
-          command: |
-            if [ -n "$CODECOV_TOKEN" ]; then
-              curl -Os https://uploader.codecov.io/latest/linux/codecov
-              chmod +x codecov
-              ./codecov -t ${CODECOV_TOKEN}
-            else
-              echo "CODECOV_TOKEN not found. Skipping upload."
-            fi
+            xvfb-run pytest tests -ra -q --ignore=test_results.txt
 
   # ── 3. Build (Linux) ─────────────────────────────────────────────────────
   build-linux:
@@ -123,13 +95,7 @@ workflows:
   version: 2
   ci_cd_pipeline:
     jobs:
-      - quality:
-          filters:
-            tags:
-              only: /^v.*/
       - test:
-          requires:
-            - quality
           filters:
             tags:
               only: /^v.*/

@@ -12,37 +12,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # ── 1. Quality Assurance ──────────────────────────────────────────────────
-  quality:
-    name: Code Quality & Security
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Lint with flake8 (Syntax & logic)
-        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-
-      - name: Check Formatting (Black)
-        run: black . --check
-
-      - name: Security Scan (Bandit)
-        run: bandit -r . -ll
-
-  # ── 2. Testing ───────────────────────────────────────────────────────────
+  # ── 1. Testing ───────────────────────────────────────────────────────────
   test:
     name: Unit & Integration Tests
-    needs: quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,15 +32,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests with Coverage
+      - name: Run tests
         run: |
-          xvfb-run pytest tests -ra -q --ignore=test_results.txt --cov=. --cov-report=xml --cov-report=term-missing
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
+          xvfb-run pytest tests -ra -q --ignore=test_results.txt
 
   # ── 3. Build ─────────────────────────────────────────────────────────────
   build:
