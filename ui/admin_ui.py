@@ -31,7 +31,18 @@ class AdminUI(tk.Toplevel):
                  bg=PALETTE["accent2"], fg="white").pack(side="left", padx=16)
         tk.Label(bar, text=f"{self.user.username}  [{self.user.role}]",
                  font=FONT_LABEL,
-                 bg=PALETTE["accent2"], fg="#AACCFF").pack(side="right", padx=16)
+                 bg=PALETTE["accent2"], fg="#AACCFF").pack(side="right", padx=(16, 8))
+        
+        # Custom Logout button
+        log_f = tk.Frame(bar, bg="#E94560", padx=0, pady=0)
+        log_f.pack(side="right", padx=16)
+        log_l = tk.Label(log_f, text="Logout 🚪", font=("Helvetica", 9, "bold"),
+                         bg="#E94560", fg="white", padx=12, pady=4,
+                         cursor="hand2")
+        log_l.pack()
+        log_l.bind("<Enter>", lambda e: log_l.config(bg="#C0392B"))
+        log_l.bind("<Leave>", lambda e: log_l.config(bg="#E94560"))
+        log_l.bind("<Button-1>", lambda e: self.master.show_login(self))
 
         # Notebook tabs
         nb = ttk.Notebook(self)
@@ -56,24 +67,31 @@ class AdminUI(tk.Toplevel):
     # LISTINGS TAB
     # ═══════════════════════════════════════════════════════════════════════════
 
+    def _btn(self, parent, text, command, bg=None, side="left", padx=4):
+        """Helper to create custom Frame+Label buttons for macOS consistency."""
+        color = bg if bg else PALETTE["accent"]
+        f = tk.Frame(parent, bg=color, padx=0, pady=0)
+        f.pack(side=side, padx=padx)
+        l = tk.Label(f, text=text, font=FONT_BUTTON,
+                     bg=color, fg="white", padx=12, pady=6,
+                     cursor="hand2")
+        l.pack()
+        l.bind("<Enter>", lambda e: l.config(bg=PALETTE["accent2"]))
+        l.bind("<Leave>", lambda e: l.config(bg=color))
+        l.bind("<Button-1>", lambda e: command())
+        return f
+
     def _build_listings_tab(self):
         parent = self._tab_listings
 
         # Toolbar
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="➕ Add Listing", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._add_listing_dialog).pack(side="left", padx=(0, 4))
-        tk.Button(tb, text="✏️ Edit Selected", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._edit_listing_dialog).pack(side="left", padx=4)
-        tk.Button(tb, text="🗑 Delete Selected", font=FONT_BUTTON,
-                  bg=PALETTE["accent"], fg="white", relief="flat",
-                  cursor="hand2", command=self._delete_listing).pack(side="left", padx=4)
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_listings).pack(side="right")
+        
+        self._btn(tb, "➕ Add Listing", self._add_listing_dialog, bg="#2ECC71")
+        self._btn(tb, "✏️ Edit Selected", self._edit_listing_dialog, bg=PALETTE["accent2"])
+        self._btn(tb, "🗑 Delete Selected", self._delete_listing, bg=PALETTE["accent"])
+        self._btn(tb, "🔄 Refresh", self._load_listings, bg=PALETTE["accent2"], side="right")
 
         # Treeview
         cols = ("ID", "Film", "Cinema", "Date", "Time", "Type", "Screen")
@@ -140,12 +158,8 @@ class AdminUI(tk.Toplevel):
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="❌ Cancel Selected", font=FONT_BUTTON,
-                  bg=PALETTE["accent"], fg="white", relief="flat",
-                  cursor="hand2", command=self._cancel_selected).pack(side="left", padx=4)
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_bookings).pack(side="right")
+        self._btn(tb, "❌ Cancel Selected", self._cancel_selected, bg=PALETTE["accent"])
+        self._btn(tb, "🔄 Refresh", self._load_bookings, bg=PALETTE["accent2"], side="right")
 
         cols = ("Ref", "Film", "Date", "Time", "Tickets", "Total", "Status", "Booked On")
         self._bk_tree = self._make_tree(parent, cols)
@@ -199,12 +213,8 @@ class AdminUI(tk.Toplevel):
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="➕ Add Film", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._add_film_dialog).pack(side="left")
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_films).pack(side="right")
+        self._btn(tb, "➕ Add Film", self._add_film_dialog, bg="#2ECC71")
+        self._btn(tb, "🔄 Refresh", self._load_films, bg=PALETTE["accent2"], side="right")
 
         cols = ("ID", "Title", "Genre", "Rating", "Actors")
         self._film_tree = self._make_tree(parent, cols)
@@ -262,12 +272,8 @@ class AdminUI(tk.Toplevel):
             ttk.Radiobutton(ctrl_frame, text=rt.capitalize(),
                             variable=self._report_var, value=rt).pack(side="left", padx=8)
 
-        tk.Button(ctrl_frame, text="▶ Generate", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._generate_report).pack(side="left", padx=(16, 4))
-        tk.Button(ctrl_frame, text="💾 Export CSV", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._export_report).pack(side="left")
+        self._btn(ctrl_frame, "▶ Generate", self._generate_report, bg="#2ECC71")
+        self._btn(ctrl_frame, "💾 Export CSV", self._export_report, bg=PALETTE["accent2"])
 
         # Report treeview
         self._report_tree = ttk.Treeview(parent, show="headings")
@@ -400,12 +406,15 @@ class _ListingDialog(tk.Toplevel):
                                 wraplength=380)
         self._status.grid(row=len(fields), column=0, columnspan=2, pady=(8, 0))
 
-        tk.Button(inner, text="Save",
-                  font=FONT_BUTTON, bg=PALETTE["success"],
-                  fg="white", relief="flat", cursor="hand2",
-                  command=self._save).grid(
-            row=len(fields)+1, column=0, columnspan=2,
-            sticky="ew", pady=(12, 0), ipady=6)
+        # Custom Save button
+        btn_f = tk.Frame(inner, bg=PALETTE["success"])
+        btn_f.grid(row=len(fields)+1, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+        btn = tk.Label(btn_f, text="SAVE", font=FONT_BUTTON, bg=PALETTE["success"],
+                      fg="white", cursor="hand2", pady=10)
+        btn.pack(fill="x")
+        btn.bind("<Enter>", lambda e: btn.config(bg="#27ae60"))
+        btn.bind("<Leave>", lambda e: btn.config(bg=PALETTE["success"]))
+        btn.bind("<Button-1>", lambda e: self._save())
 
     def _prefill(self):
         from models.listing import Listing
@@ -499,12 +508,15 @@ class _FilmDialog(tk.Toplevel):
                                 bg=PALETTE["bg"], fg=PALETTE["accent"])
         self._status.grid(row=5, column=0, columnspan=2, pady=(8, 0))
 
-        tk.Button(inner, text="Add Film",
-                  font=FONT_BUTTON, bg=PALETTE["success"],
-                  fg="white", relief="flat", cursor="hand2",
-                  command=self._save).grid(
-            row=6, column=0, columnspan=2,
-            sticky="ew", pady=(12, 0), ipady=6)
+        # Custom Add Film button
+        btn_f = tk.Frame(inner, bg=PALETTE["success"])
+        btn_f.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+        btn = tk.Label(btn_f, text="ADD FILM", font=FONT_BUTTON, bg=PALETTE["success"],
+                      fg="white", cursor="hand2", pady=10)
+        btn.pack(fill="x")
+        btn.bind("<Enter>", lambda e: btn.config(bg="#27ae60"))
+        btn.bind("<Leave>", lambda e: btn.config(bg=PALETTE["success"]))
+        btn.bind("<Button-1>", lambda e: self._save())
 
     def _save(self):
         try:

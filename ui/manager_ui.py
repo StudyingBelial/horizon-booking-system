@@ -31,7 +31,18 @@ class ManagerUI(tk.Toplevel):
                  bg="#0F3460", fg="white").pack(side="left", padx=16)
         tk.Label(bar, text=f"{self.user.username}  [{self.user.role}]",
                  font=FONT_LABEL,
-                 bg="#0F3460", fg="#AACCFF").pack(side="right", padx=16)
+                 bg="#0F3460", fg="#AACCFF").pack(side="right", padx=(16, 8))
+
+        # Custom Logout button
+        log_f = tk.Frame(bar, bg="#E94560", padx=0, pady=0)
+        log_f.pack(side="right", padx=16)
+        log_l = tk.Label(log_f, text="Logout 🚪", font=("Helvetica", 9, "bold"),
+                         bg="#E94560", fg="white", padx=12, pady=4,
+                         cursor="hand2")
+        log_l.pack()
+        log_l.bind("<Enter>", lambda e: log_l.config(bg="#C0392B"))
+        log_l.bind("<Leave>", lambda e: log_l.config(bg="#E94560"))
+        log_l.bind("<Button-1>", lambda e: self.master.show_login(self))
 
         # Stats strip
         self._build_stats_strip()
@@ -85,20 +96,29 @@ class ManagerUI(tk.Toplevel):
     # CINEMAS TAB
     # ═══════════════════════════════════════════════════════════════════════════
 
+    def _btn(self, parent, text, command, bg=None, side="left", padx=4):
+        """Helper to create custom Frame+Label buttons for macOS consistency."""
+        color = bg if bg else PALETTE["accent"]
+        f = tk.Frame(parent, bg=color, padx=0, pady=0)
+        f.pack(side=side, padx=padx)
+        l = tk.Label(f, text=text, font=FONT_BUTTON,
+                     bg=color, fg="white", padx=12, pady=6,
+                     cursor="hand2")
+        l.pack()
+        l.bind("<Enter>", lambda e: l.config(bg=PALETTE["accent2"]))
+        l.bind("<Leave>", lambda e: l.config(bg=color))
+        l.bind("<Button-1>", lambda e: command())
+        return f
+
     def _build_cinemas_tab(self):
         parent = self._tab_cinemas
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="➕ Add Cinema", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._add_cinema_dialog).pack(side="left", padx=4)
-        tk.Button(tb, text="➕ Add Screen", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._add_screen_dialog).pack(side="left", padx=4)
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_cinemas).pack(side="right")
+        
+        self._btn(tb, "➕ Add Cinema", self._add_cinema_dialog, bg="#2ECC71")
+        self._btn(tb, "➕ Add Screen", self._add_screen_dialog, bg=PALETTE["accent2"])
+        self._btn(tb, "🔄 Refresh", self._load_cinemas, bg=PALETTE["accent2"], side="right")
 
         cols = ("ID", "Name", "City", "Address", "Screens")
         self._cinema_tree = self._make_tree(parent, cols)
@@ -157,12 +177,8 @@ class ManagerUI(tk.Toplevel):
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="➕ Add City", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._add_city_dialog).pack(side="left")
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_cities).pack(side="right")
+        self._btn(tb, "➕ Add City", self._add_city_dialog, bg="#2ECC71")
+        self._btn(tb, "🔄 Refresh", self._load_cities, bg=PALETTE["accent2"], side="right")
 
         cols = ("City", "Standard", "IMAX", "3D", "Directors")
         self._city_tree = self._make_tree(parent, cols)
@@ -201,15 +217,9 @@ class ManagerUI(tk.Toplevel):
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="➕ Add Staff", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._add_staff_dialog).pack(side="left", padx=4)
-        tk.Button(tb, text="🗑 Remove Selected", font=FONT_BUTTON,
-                  bg=PALETTE["accent"], fg="white", relief="flat",
-                  cursor="hand2", command=self._remove_staff).pack(side="left", padx=4)
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_staff).pack(side="right")
+        self._btn(tb, "➕ Add Staff", self._add_staff_dialog, bg="#2ECC71")
+        self._btn(tb, "🗑 Remove Selected", self._remove_staff, bg=PALETTE["accent"])
+        self._btn(tb, "🔄 Refresh", self._load_staff, bg=PALETTE["accent2"], side="right")
 
         cols = ("ID", "Username", "Email", "Role")
         self._staff_tree = self._make_tree(parent, cols)
@@ -255,12 +265,8 @@ class ManagerUI(tk.Toplevel):
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        tk.Button(tb, text="✏️ Update Selected Price", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._update_price_dialog).pack(side="left")
-        tk.Button(tb, text="🔄 Refresh", font=FONT_BUTTON,
-                  bg=PALETTE["accent2"], fg="white", relief="flat",
-                  cursor="hand2", command=self._load_pricing).pack(side="right")
+        self._btn(tb, "✏️ Update Selected Price", self._update_price_dialog, bg=PALETTE["accent2"])
+        self._btn(tb, "🔄 Refresh", self._load_pricing, bg=PALETTE["accent2"], side="right")
 
         cols = ("City", "Show Type", "Base Price", "Upper Gallery", "VIP")
         self._price_tree = self._make_tree(parent, cols)
@@ -307,9 +313,7 @@ class ManagerUI(tk.Toplevel):
             ttk.Radiobutton(ctrl_frame, text=rt.capitalize(),
                             variable=self._report_var, value=rt).pack(side="left", padx=8)
 
-        tk.Button(ctrl_frame, text="▶ Generate", font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white", relief="flat",
-                  cursor="hand2", command=self._generate_report).pack(side="left", padx=16)
+        self._btn(ctrl_frame, "▶ Generate", self._generate_report, bg="#2ECC71")
 
         self._report_tree = ttk.Treeview(parent, show="headings")
         vsb = ttk.Scrollbar(parent, orient="vertical",   command=self._report_tree.yview)
@@ -393,12 +397,15 @@ class _FormDialog(tk.Toplevel):
                                 wraplength=360)
         self._status.grid(row=len(self._fields), column=0, columnspan=2, pady=(6, 0))
 
-        tk.Button(inner, text="Save",
-                  font=FONT_BUTTON, bg=PALETTE["success"],
-                  fg="white", relief="flat", cursor="hand2",
-                  command=self._save).grid(
-            row=len(self._fields)+1, column=0, columnspan=2,
-            sticky="ew", pady=(10, 0), ipady=6)
+        # Custom Save button
+        btn_f = tk.Frame(inner, bg=PALETTE["success"])
+        btn_f.grid(row=len(self._fields)+1, column=0, columnspan=2, sticky="ew", pady=(10, 0))
+        btn = tk.Label(btn_f, text="SAVE", font=FONT_BUTTON, bg=PALETTE["success"],
+                      fg="white", cursor="hand2", pady=10)
+        btn.pack(fill="x")
+        btn.bind("<Enter>", lambda e: btn.config(bg="#27ae60"))
+        btn.bind("<Leave>", lambda e: btn.config(bg=PALETTE["success"]))
+        btn.bind("<Button-1>", lambda e: self._save())
 
     def _save(self):
         values = {k: v.get() for k, v in self._vars.items()}
