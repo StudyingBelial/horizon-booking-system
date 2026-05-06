@@ -393,26 +393,29 @@ class AdminUI(tk.Toplevel):
         self._last_report = None
 
     def _generate_report(self):
-        rtype = self._report_var.get()
-        month = self._month_var.get() or None
-        report = self._ctrl.generate_report(rtype, month=month)
-        self._last_report = report
-        tree = self._report_tree
+        try:
+            rtype = self._report_var.get()
+            month = self._month_var.get() or None
+            report = self._ctrl.generate_report(rtype, month=month)
+            self._last_report = report
+            tree = self._report_tree
 
-        if not report.data:
-            messagebox.showinfo("Empty", "No data for this report.")
-            return
+            if not report.data:
+                messagebox.showinfo("Empty", "No data for this report.")
+                return
 
-        # Configure columns
-        cols = list(report.data[0].keys())
-        tree["columns"] = cols
-        for col in cols:
-            tree.heading(col, text=col.replace("_", " ").title())
-            tree.column(col, width=130, minwidth=80)
+            # Configure columns
+            cols = list(report.data[0].keys())
+            tree["columns"] = cols
+            for col in cols:
+                tree.heading(col, text=col.replace("_", " ").title())
+                tree.column(col, width=130, minwidth=80)
 
-        tree.delete(*tree.get_children())
-        for row in report.data:
-            tree.insert("", "end", values=list(row.values()))
+            tree.delete(*tree.get_children())
+            for row in report.data:
+                tree.insert("", "end", values=list(row.values()))
+        except Exception as e:
+            messagebox.showerror("Report Error", f"Failed to generate report: {str(e)}")
 
     def _export_report(self):
         if not self._last_report:
