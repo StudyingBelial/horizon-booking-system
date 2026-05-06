@@ -10,3 +10,4 @@ __pycache__/
 .env
 .Python
 .DS_Store
+.cci_pycache/

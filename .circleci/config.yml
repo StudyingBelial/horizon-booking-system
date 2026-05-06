@@ -14,13 +14,13 @@ jobs:
           pkg-manager: pip
       - run:
           name: Lint with flake8
-          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.cci_pycache --max-line-length=127 --max-complexity=10
       - run:
           name: Check Formatting with Black
           command: black . --check
       - run:
           name: Security Scan with Bandit
-          command: bandit -r . -ll
+          command: bandit -r . -ll --exclude .cci_pycache
 
   # ── 2. Testing ───────────────────────────────────────────────────────────
   test:
