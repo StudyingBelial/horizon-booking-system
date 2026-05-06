@@ -44,12 +44,8 @@ class AdminUI(tk.Toplevel):
             fg="#AACCFF",
         ).pack(side="right", padx=(16, 8))
 
-        # Navigation buttons for hierarchy
-        self._btn(bar, "💼 Manager View", self._open_manager_view, bg=PALETTE["accent"], side="right")
-        self._btn(bar, "🎟️ Booking View", self._open_booking_view, bg=PALETTE["success"], side="right")
-
         # Custom Logout button
-        tk.Button(
+        log_b = tk.Button(
             bar,
             text="Logout 🚪",
             font=("Helvetica", 9, "bold"),
@@ -60,7 +56,8 @@ class AdminUI(tk.Toplevel):
             activebackground="#C0392B",
             activeforeground="white",
             command=lambda: self.master.show_login(self),
-        ).pack(side="right", padx=16, pady=4)
+        )
+        log_b.pack(side="right", padx=16, pady=4)
 
         # Notebook tabs
         nb = ttk.Notebook(self)
@@ -419,14 +416,6 @@ class AdminUI(tk.Toplevel):
                 tree.insert("", "end", values=list(row.values()))
         except Exception as e:
             messagebox.showerror("Report Error", f"Failed to generate report: {str(e)}")
-
-    def _open_manager_view(self):
-        from ui.manager_ui import ManagerUI
-        ManagerUI(self.master, self.user)
-
-    def _open_booking_view(self):
-        from ui.booking_ui import BookingUI
-        BookingUI(self.master, self.user)
 
     def _export_report(self):
         if not self._last_report:

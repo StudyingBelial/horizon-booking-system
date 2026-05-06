@@ -45,18 +45,14 @@ class ManagerUI(tk.Toplevel):
             fg="#AACCFF",
         ).pack(side="right", padx=(16, 8))
 
-        # Booking View button (Hierarchical: Manager can do Staff things)
-        self._btn(bar, "🎟️ Booking View", self._open_booking_view, bg=PALETTE["success"], side="right")
-
-        # Admin View button (Hierarchical: Admin can do Manager things)
-        if self.user.role == "Admin":
-            self._btn(
-                bar,
-                "🛠 Admin View",
-                self._open_admin_view,
-                bg=PALETTE["accent"],
-                side="right",
-            )
+        # Admin View button
+        self._btn(
+            bar,
+            "🛠 Admin View",
+            self._open_admin_view,
+            bg=PALETTE["accent"],
+            side="right",
+        )
 
         # Custom Logout button
         log_b = tk.Button(
@@ -496,11 +492,8 @@ class ManagerUI(tk.Toplevel):
 
     def _open_admin_view(self):
         from ui.admin_ui import AdminUI
-        AdminUI(self.master, self.user)
 
-    def _open_booking_view(self):
-        from ui.booking_ui import BookingUI
-        BookingUI(self.master, self.user)
+        AdminUI(self.master, self.user)
 
     # ── Helper ─────────────────────────────────────────────────────────────────
 

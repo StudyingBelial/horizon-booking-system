@@ -165,30 +165,7 @@ class LoginUI(tk.Tk):
             fg=PALETTE["muted"],
         ).pack()
 
-        # ── Role Selection Dropdown ──────────────────────────────────────────
-        role_container = tk.Frame(self, bg=PALETTE["bg"])
-        role_container.pack(pady=(20, 0), padx=48, fill="x")
-
-        tk.Label(
-            role_container,
-            text="Select Portal:",
-            font=FONT_LABEL,
-            bg=PALETTE["bg"],
-            fg=PALETTE["muted"],
-        ).pack(side="left")
-
-        self._role_var = tk.StringVar()
-        self._role_dropdown = ttk.Combobox(
-            role_container,
-            textvariable=self._role_var,
-            values=["Admin Portal", "Staff Portal", "Manager Portal"],
-            state="readonly",
-            width=20,
-        )
-        self._role_dropdown.pack(side="left", padx=10, fill="x", expand=True)
-        self._role_dropdown.bind("<<ComboboxSelected>>", self._on_role_dropdown_change)
-        
-
+        # (Role buttons removed from here to be placed at the bottom)
 
         # ── Card ──────────────────────────────────────────────────────────────
         card = tk.Frame(
@@ -254,25 +231,58 @@ class LoginUI(tk.Tk):
         )
         self._status.pack(pady=(8, 0))
 
-        # ── Footer ────────────────────────────────────────────────────────────
         tk.Label(
             self,
-            text="Choose a portal from the dropdown to pre-fill credentials",
+            text="Enter credentials manually or use quick access:",
             font=("Helvetica", 8),
             bg=PALETTE["bg"],
             fg=PALETTE["muted"],
-        ).pack(pady=(10, 10))
+        ).pack(pady=(10, 2))
 
-    def _on_role_dropdown_change(self, event=None):
-        """User selected a portal; we just clear fields and focus for manual entry."""
+        # ── Quick Access Dropdown ────────────────────────────────────────────
+        quick_frame = tk.Frame(self, bg=PALETTE["bg"])
+        quick_frame.pack(pady=(0, 20))
+
+        tk.Label(
+            quick_frame,
+            text="Quick Login:",
+            font=FONT_LABEL,
+            bg=PALETTE["bg"],
+            fg=PALETTE["muted"],
+        ).pack(side="left", padx=8)
+
+        self._quick_var = tk.StringVar(value="-- Select Role --")
+        self._roles_map = {
+            "Admin (🛡️)": "admin",
+            "Manager (💼)": "manager",
+            "Staff (🎟️)": "staff1",
+        }
+        
+        quick_combo = ttk.Combobox(
+            quick_frame,
+            textvariable=self._quick_var,
+            values=list(self._roles_map.keys()),
+            state="readonly",
+            width=18,
+        )
+        quick_combo.pack(side="left")
+        quick_combo.bind("<<ComboboxSelected>>", self._on_quick_select)
+
+    def _on_quick_select(self, event):
+        """Handle selection from the quick access dropdown."""
+        display_name = self._quick_var.get()
+        username = self._roles_map.get(display_name)
+        if username:
+            self._select_role(username)
+
+    def _select_role(self, username):
+        """Focus password and update status (No longer auto-fills username)."""
         self._username.delete(0, tk.END)
         self._password.delete(0, tk.END)
         self._username.focus()
-        selection = self._role_var.get()
         self._status.config(
-            text=f"Switched to {selection}", fg=PALETTE["muted"]
+            text=f"Ready for {username.capitalize()} Portal", fg=PALETTE["muted"]
         )
-
 
     def _login(self):
         username = self._username.get()
