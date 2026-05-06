@@ -1,4 +1,3 @@
-
 """
 main.py — Entry point for the Horizon Cinemas Booking System (HCBS).
 

@@ -10,32 +10,32 @@ from tkinter import ttk, messagebox
 from controllers.auth_controller import AuthController
 from utils.constants import Role
 
-
 # ── Shared colour palette used across all windows ────────────────────────────
 PALETTE = {
-    "bg":       "#0F0F1A",   # deep navy-black
-    "surface":  "#1A1A2E",   # card background
-    "accent":   "#00A8FF",   # vibrant electric blue
-    "accent2":  "#007BFF",   # deeper blue accent
-    "text":     "#E0E0E0",   # primary text
-    "muted":    "#7A7A9A",   # secondary text
-    "success":  "#2ECC71",
-    "warning":  "#F39C12",
-    "border":   "#2A2A4A",
+    "bg": "#0F0F1A",  # deep navy-black
+    "surface": "#1A1A2E",  # card background
+    "accent": "#00A8FF",  # vibrant electric blue
+    "accent2": "#007BFF",  # deeper blue accent
+    "text": "#E0E0E0",  # primary text
+    "muted": "#7A7A9A",  # secondary text
+    "success": "#2ECC71",
+    "warning": "#F39C12",
+    "border": "#2A2A4A",
 }
 # ... existing font constants ...
-FONT_TITLE  = ("Helvetica", 22, "bold")
-FONT_SUB    = ("Helvetica", 11)
-FONT_LABEL  = ("Helvetica", 10)
+FONT_TITLE = ("Helvetica", 22, "bold")
+FONT_SUB = ("Helvetica", 11)
+FONT_LABEL = ("Helvetica", 10)
 FONT_BUTTON = ("Helvetica", 11, "bold")
-FONT_INPUT  = ("Helvetica", 11)
+FONT_INPUT = ("Helvetica", 11)
 
 
 def apply_dark_style(root):
     """Apply ttk dark styling globally."""
     style = ttk.Style(root)
     style.theme_use("clam")
-    style.configure(".",
+    style.configure(
+        ".",
         background=PALETTE["bg"],
         foreground=PALETTE["text"],
         fieldbackground=PALETTE["surface"],
@@ -46,51 +46,81 @@ def apply_dark_style(root):
         selectforeground=PALETTE["text"],
         font=FONT_LABEL,
     )
-    style.configure("TFrame",  background=PALETTE["bg"])
-    style.configure("TLabel",  background=PALETTE["bg"],  foreground=PALETTE["text"])
-    style.configure("TEntry",  fieldbackground=PALETTE["surface"],
-                    foreground=PALETTE["text"], insertcolor=PALETTE["text"],
-                    bordercolor=PALETTE["border"])
-    style.configure("Accent.TButton",
-        background=PALETTE["accent"], foreground="white",
-        font=FONT_BUTTON, padding=(12, 6), relief="flat",
-    )
-    style.map("Accent.TButton",
-        background=[("active", PALETTE["accent2"]), ("pressed", "#0056b3")],
-    )
-    style.configure("TButton",
-        background=PALETTE["accent2"], foreground="white",
-        font=FONT_BUTTON, padding=(10, 5), relief="flat",
-    )
-    style.map("TButton",
-        background=[("active", "#0056b3"), ("pressed", "#004085")],
-    )
-    style.configure("TCombobox",
-        fieldbackground=PALETTE["surface"], background=PALETTE["surface"],
-        foreground=PALETTE["text"], selectbackground=PALETTE["accent2"],
-    )
-    style.configure("Treeview",
-        background=PALETTE["surface"], foreground=PALETTE["text"],
-        rowheight=26, fieldbackground=PALETTE["surface"],
+    style.configure("TFrame", background=PALETTE["bg"])
+    style.configure("TLabel", background=PALETTE["bg"], foreground=PALETTE["text"])
+    style.configure(
+        "TEntry",
+        fieldbackground=PALETTE["surface"],
+        foreground=PALETTE["text"],
+        insertcolor=PALETTE["text"],
         bordercolor=PALETTE["border"],
     )
-    style.configure("Treeview.Heading",
-        background=PALETTE["accent2"], foreground="white",
+    style.configure(
+        "Accent.TButton",
+        background=PALETTE["accent"],
+        foreground="white",
+        font=FONT_BUTTON,
+        padding=(12, 6),
+        relief="flat",
+    )
+    style.map(
+        "Accent.TButton",
+        background=[("active", PALETTE["accent2"]), ("pressed", "#0056b3")],
+    )
+    style.configure(
+        "TButton",
+        background=PALETTE["accent2"],
+        foreground="white",
+        font=FONT_BUTTON,
+        padding=(10, 5),
+        relief="flat",
+    )
+    style.map(
+        "TButton",
+        background=[("active", "#0056b3"), ("pressed", "#004085")],
+    )
+    style.configure(
+        "TCombobox",
+        fieldbackground=PALETTE["surface"],
+        background=PALETTE["surface"],
+        foreground=PALETTE["text"],
+        selectbackground=PALETTE["accent2"],
+    )
+    style.configure(
+        "Treeview",
+        background=PALETTE["surface"],
+        foreground=PALETTE["text"],
+        rowheight=26,
+        fieldbackground=PALETTE["surface"],
+        bordercolor=PALETTE["border"],
+    )
+    style.configure(
+        "Treeview.Heading",
+        background=PALETTE["accent2"],
+        foreground="white",
         font=("Helvetica", 10, "bold"),
     )
     style.map("Treeview", background=[("selected", PALETTE["accent"])])
-    style.configure("TScrollbar",
-        background=PALETTE["surface"], troughcolor=PALETTE["bg"],
+    style.configure(
+        "TScrollbar",
+        background=PALETTE["surface"],
+        troughcolor=PALETTE["bg"],
         arrowcolor=PALETTE["muted"],
     )
-    style.configure("TNotebook",
-        background=PALETTE["bg"], tabmargins=[2, 5, 2, 0],
+    style.configure(
+        "TNotebook",
+        background=PALETTE["bg"],
+        tabmargins=[2, 5, 2, 0],
     )
-    style.configure("TNotebook.Tab",
-        background=PALETTE["accent2"], foreground="white",
-        padding=[12, 4], font=("Helvetica", 10),
+    style.configure(
+        "TNotebook.Tab",
+        background=PALETTE["accent2"],
+        foreground="white",
+        padding=[12, 4],
+        font=("Helvetica", 10),
     )
-    style.map("TNotebook.Tab",
+    style.map(
+        "TNotebook.Tab",
         background=[("selected", PALETTE["accent"])],
         foreground=[("selected", "white")],
     )
@@ -113,14 +143,27 @@ class LoginUI(tk.Tk):
         header = tk.Frame(self, bg=PALETTE["bg"])
         header.pack(pady=(40, 0))
 
-        tk.Label(header, text="🎬", font=("Helvetica", 42),
-                 bg=PALETTE["bg"], fg=PALETTE["accent"]).pack()
-        tk.Label(header, text="HORIZON CINEMAS",
-                 font=("Helvetica", 18, "bold"),
-                 bg=PALETTE["bg"], fg=PALETTE["text"]).pack(pady=(2, 0))
-        tk.Label(header, text="Booking Management System",
-                 font=("Helvetica", 10),
-                 bg=PALETTE["bg"], fg=PALETTE["muted"]).pack()
+        tk.Label(
+            header,
+            text="🎬",
+            font=("Helvetica", 42),
+            bg=PALETTE["bg"],
+            fg=PALETTE["accent"],
+        ).pack()
+        tk.Label(
+            header,
+            text="HORIZON CINEMAS",
+            font=("Helvetica", 18, "bold"),
+            bg=PALETTE["bg"],
+            fg=PALETTE["text"],
+        ).pack(pady=(2, 0))
+        tk.Label(
+            header,
+            text="Booking Management System",
+            font=("Helvetica", 10),
+            bg=PALETTE["bg"],
+            fg=PALETTE["muted"],
+        ).pack()
 
         # ── Role Selection ───────────────────────────────────────────────────
         role_container = tk.Frame(self, bg=PALETTE["bg"])
@@ -129,77 +172,114 @@ class LoginUI(tk.Tk):
         roles = [
             ("Admin", "🛡️", "admin"),
             ("Manager", "💼", "manager"),
-            ("Staff", "🎟️", "staff1")
+            ("Staff", "🎟️", "staff1"),
         ]
 
         self._role_btns = {}
         for name, icon, uname in roles:
             # Using ttk.Button with the Accent style for native Windows feel
-            b = ttk.Button(role_container, text=f"{icon}  {name}", style="Accent.TButton",
-                           command=lambda u=uname: self._select_role(u))
+            b = ttk.Button(
+                role_container,
+                text=f"{icon}  {name}",
+                style="Accent.TButton",
+                command=lambda u=uname: self._select_role(u),
+            )
             b.pack(side="left", expand=True, fill="both", padx=4)
             self._role_btns[name] = b
 
         # ── Card ──────────────────────────────────────────────────────────────
-        card = tk.Frame(self, bg=PALETTE["surface"],
-                        bd=0, highlightthickness=1,
-                        highlightbackground=PALETTE["border"])
+        card = tk.Frame(
+            self,
+            bg=PALETTE["surface"],
+            bd=0,
+            highlightthickness=1,
+            highlightbackground=PALETTE["border"],
+        )
         card.pack(padx=48, pady=20, fill="x")
 
         inner = tk.Frame(card, bg=PALETTE["surface"])
         inner.pack(padx=28, pady=20, fill="x")
 
-        tk.Label(inner, text="Sign In", font=FONT_TITLE,
-                 bg=PALETTE["surface"], fg=PALETTE["text"]).pack(anchor="w")
-        tk.Label(inner, text="Enter your credentials to continue",
-                 font=FONT_SUB,
-                 bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w", pady=(4, 12))
+        tk.Label(
+            inner,
+            text="Sign In",
+            font=FONT_TITLE,
+            bg=PALETTE["surface"],
+            fg=PALETTE["text"],
+        ).pack(anchor="w")
+        tk.Label(
+            inner,
+            text="Enter your credentials to continue",
+            font=FONT_SUB,
+            bg=PALETTE["surface"],
+            fg=PALETTE["muted"],
+        ).pack(anchor="w", pady=(4, 12))
 
         # Username
-        tk.Label(inner, text="Username", font=FONT_LABEL,
-                 bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w")
+        tk.Label(
+            inner,
+            text="Username",
+            font=FONT_LABEL,
+            bg=PALETTE["surface"],
+            fg=PALETTE["muted"],
+        ).pack(anchor="w")
         self._username = ttk.Entry(inner, font=FONT_INPUT)
         self._username.pack(fill="x", pady=(2, 12), ipady=6)
         self._username.focus()
 
         # Password
-        tk.Label(inner, text="Password", font=FONT_LABEL,
-                 bg=PALETTE["surface"], fg=PALETTE["muted"]).pack(anchor="w")
+        tk.Label(
+            inner,
+            text="Password",
+            font=FONT_LABEL,
+            bg=PALETTE["surface"],
+            fg=PALETTE["muted"],
+        ).pack(anchor="w")
         self._password = ttk.Entry(inner, show="●", font=FONT_INPUT)
         self._password.pack(fill="x", pady=(2, 16), ipady=6)
         self._password.bind("<Return>", lambda e: self._login())
 
         # Login button - Native ttk Button
-        btn = ttk.Button(inner, text="SIGN IN →", style="Accent.TButton",
-                         command=self._login)
+        btn = ttk.Button(
+            inner, text="SIGN IN →", style="Accent.TButton", command=self._login
+        )
         btn.pack(fill="x", pady=(12, 0))
 
         # Status label
-        self._status = tk.Label(inner, text="", font=FONT_LABEL,
-                                bg=PALETTE["surface"], fg=PALETTE["accent"])
+        self._status = tk.Label(
+            inner, text="", font=FONT_LABEL, bg=PALETTE["surface"], fg=PALETTE["accent"]
+        )
         self._status.pack(pady=(8, 0))
 
         # ── Footer ────────────────────────────────────────────────────────────
-        tk.Label(self, text="Select a portal to pre-fill or enter credentials manually",
-                 font=("Helvetica", 8),
-                 bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(pady=(10, 10))
+        tk.Label(
+            self,
+            text="Select a portal to pre-fill or enter credentials manually",
+            font=("Helvetica", 8),
+            bg=PALETTE["bg"],
+            fg=PALETTE["muted"],
+        ).pack(pady=(10, 10))
 
     def _select_role(self, username):
         """Pre-fill username and focus password when a role is clicked."""
         self._username.delete(0, tk.END)
         self._username.insert(0, username)
-        
+
         # We no longer pre-fill the password for security/design preference.
         self._password.delete(0, tk.END)
         self._password.focus()
-        self._status.config(text=f"Selected {username.capitalize()} Portal", fg=PALETTE["muted"])
+        self._status.config(
+            text=f"Selected {username.capitalize()} Portal", fg=PALETTE["muted"]
+        )
 
     def _login(self):
         username = self._username.get()
         password = self._password.get()
         try:
             user = AuthController.login(username, password)
-            self._status.config(text=f"Welcome, {user.username}!", fg=PALETTE["success"])
+            self._status.config(
+                text=f"Welcome, {user.username}!", fg=PALETTE["success"]
+            )
             self.after(600, lambda: self._redirect(user))
         except ValueError as e:
             self._status.config(text=str(e), fg=PALETTE["accent"])
@@ -212,12 +292,15 @@ class LoginUI(tk.Tk):
 
         if role == Role.BOOKING_STAFF:
             from ui.booking_ui import BookingUI
+
             win = BookingUI(self, user)
         elif role == Role.ADMIN:
             from ui.admin_ui import AdminUI
+
             win = AdminUI(self, user)
         elif role == Role.MANAGER:
             from ui.manager_ui import ManagerUI
+
             win = ManagerUI(self, user)
         else:
             messagebox.showerror("Error", f"Unknown role: {role}")
@@ -229,7 +312,8 @@ class LoginUI(tk.Tk):
     def show_login(self, win):
         """Called by dashboards to return to the login screen."""
         AuthController.logout()
-        if win: win.destroy()
+        if win:
+            win.destroy()
         self._username.delete(0, tk.END)
         self._password.delete(0, tk.END)
         self._status.config(text="")
@@ -237,4 +321,3 @@ class LoginUI(tk.Tk):
 
     def _on_child_close(self, win):
         self.show_login(win)
-
