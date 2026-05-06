@@ -1,0 +1,122 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@3.0.0
+  win: circleci/windows@5.0.0
+
+jobs:
+  # ── 1. Testing ───────────────────────────────────────────────────────────
+  test:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python3-tk xvfb
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Run tests
+          command: |
+            xvfb-run pytest tests -ra -q --ignore=test_results.txt
+
+  # ── 3. Build (Linux) ─────────────────────────────────────────────────────
+  build-linux:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python3-tk binutils
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Build Binary (Linux)
+          command: |
+            pyinstaller --onefile --noconsole --name "HorizonBookingSystem" --add-data "database:database" main.py
+      - store_artifacts:
+          path: dist/HorizonBookingSystem
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/HorizonBookingSystem
+
+  # ── 3. Build (Windows) ───────────────────────────────────────────────────
+  build-windows:
+    executor:
+      name: win/default
+    steps:
+      - checkout
+      - run:
+          name: Install Python dependencies
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+      - run:
+          name: Build Binary (Windows)
+          command: |
+            pyinstaller --onefile --noconsole --name "HorizonBookingSystem" --add-data "database;database" main.py
+      - store_artifacts:
+          path: dist/HorizonBookingSystem.exe
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist/HorizonBookingSystem.exe
+
+  # ── 4. Release ───────────────────────────────────────────────────────────
+  release:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Create GitHub Release
+          command: |
+            if [ -z "$GH_TOKEN" ]; then
+              echo "GH_TOKEN not found. Skipping release."
+              exit 0
+            fi
+            TAG=$CIRCLE_TAG
+            gh release create "$TAG" \
+              dist/HorizonBookingSystem \
+              dist/HorizonBookingSystem.exe \
+              --title "Release $TAG" \
+              --notes "Automated release from CircleCI"
+
+workflows:
+  version: 2
+  ci_cd_pipeline:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+      - build-linux:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+      - build-windows:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+      - release:
+          requires:
+            - build-linux
+            - build-windows
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/

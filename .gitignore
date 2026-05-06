@@ -1,0 +1,15 @@
+*.db
+*.db-journal
+*.db-wal
+*.pdf
+*.pyc
+*.pyo
+*.pyd
+
+__pycache__/
+
+.venv
+.env
+.Python
+.DS_Store
+.cci_pycache/
