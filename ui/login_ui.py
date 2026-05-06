@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 ui/login_ui.py — Login screen with role-based redirection.
 """
@@ -131,23 +134,10 @@ class LoginUI(tk.Tk):
 
         self._role_btns = {}
         for name, icon, uname in roles:
-            # Using a Frame + Label approach for better color control on macOS
-            f = tk.Frame(role_container, bg=PALETTE["accent2"], padx=1, pady=1)
-            f.pack(side="left", expand=True, fill="both", padx=4)
-
-            b = tk.Label(f, 
-                        text=f"{icon}\n{name}",
-                        font=("Helvetica", 10, "bold"),
-                        bg=PALETTE["surface"], fg=PALETTE["text"],
-                        padx=10, pady=10,
-                        cursor="hand2")
-            b.pack(expand=True, fill="both")
-            
-            # Hover & Click events
-            b.bind("<Enter>", lambda e, lbl=b: lbl.config(bg=PALETTE["accent2"], fg="white"))
-            b.bind("<Leave>", lambda e, lbl=b: lbl.config(bg=PALETTE["surface"], fg=PALETTE["text"]))
-            b.bind("<Button-1>", lambda e, u=uname: self._select_role(u))
-            
+            # Using ttk.Button with the Accent style for native Windows feel
+            b = ttk.Button(role_container, text=f"{icon}  {name}", style="Accent.TButton",
+                           command=lambda u=uname: self._select_role(u))
+            b.pack(side="left", expand=True, fill="both", padx=4)
             self._role_btns[name] = b
 
         # ── Card ──────────────────────────────────────────────────────────────
@@ -179,19 +169,10 @@ class LoginUI(tk.Tk):
         self._password.pack(fill="x", pady=(2, 16), ipady=6)
         self._password.bind("<Return>", lambda e: self._login())
 
-        # Login button - Custom Frame+Label for consistent Blue
-        btn_frame = tk.Frame(inner, bg=PALETTE["accent"])
-        btn_frame.pack(fill="x", ipady=0)
-        
-        btn = tk.Label(btn_frame, text="SIGN IN →",
-                      font=("Helvetica", 12, "bold"),
-                      bg=PALETTE["accent"], fg="white",
-                      cursor="hand2", pady=12)
-        btn.pack(fill="x")
-        
-        btn.bind("<Enter>", lambda e: btn.config(bg=PALETTE["accent2"]))
-        btn.bind("<Leave>", lambda e: btn.config(bg=PALETTE["accent"]))
-        btn.bind("<Button-1>", lambda e: self._login())
+        # Login button - Native ttk Button
+        btn = ttk.Button(inner, text="SIGN IN →", style="Accent.TButton",
+                         command=self._login)
+        btn.pack(fill="x", pady=(12, 0))
 
         # Status label
         self._status = tk.Label(inner, text="", font=FONT_LABEL,
@@ -256,3 +237,4 @@ class LoginUI(tk.Tk):
 
     def _on_child_close(self, win):
         self.show_login(win)
+

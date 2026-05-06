@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 ui/admin_ui.py — Admin dashboard: manage listings, films, and reports.
 """
@@ -34,15 +37,11 @@ class AdminUI(tk.Toplevel):
                  bg=PALETTE["accent2"], fg="#AACCFF").pack(side="right", padx=(16, 8))
         
         # Custom Logout button
-        log_f = tk.Frame(bar, bg="#E94560", padx=0, pady=0)
-        log_f.pack(side="right", padx=16)
-        log_l = tk.Label(log_f, text="Logout 🚪", font=("Helvetica", 9, "bold"),
-                         bg="#E94560", fg="white", padx=12, pady=4,
-                         cursor="hand2")
-        log_l.pack()
-        log_l.bind("<Enter>", lambda e: log_l.config(bg="#C0392B"))
-        log_l.bind("<Leave>", lambda e: log_l.config(bg="#E94560"))
-        log_l.bind("<Button-1>", lambda e: self.master.show_login(self))
+        log_b = tk.Button(bar, text="Logout 🚪", font=("Helvetica", 9, "bold"),
+                          bg="#E94560", fg="white", cursor="hand2", relief="flat",
+                          activebackground="#C0392B", activeforeground="white",
+                          command=lambda: self.master.show_login(self))
+        log_b.pack(side="right", padx=16, pady=4)
 
         # Notebook tabs
         nb = ttk.Notebook(self)
@@ -68,18 +67,14 @@ class AdminUI(tk.Toplevel):
     # ═══════════════════════════════════════════════════════════════════════════
 
     def _btn(self, parent, text, command, bg=None, side="left", padx=4):
-        """Helper to create custom Frame+Label buttons for macOS consistency."""
+        """Helper to create native Windows buttons."""
         color = bg if bg else PALETTE["accent"]
-        f = tk.Frame(parent, bg=color, padx=0, pady=0)
-        f.pack(side=side, padx=padx)
-        l = tk.Label(f, text=text, font=FONT_BUTTON,
-                     bg=color, fg="white", padx=12, pady=6,
-                     cursor="hand2")
-        l.pack()
-        l.bind("<Enter>", lambda e: l.config(bg=PALETTE["accent2"]))
-        l.bind("<Leave>", lambda e: l.config(bg=color))
-        l.bind("<Button-1>", lambda e: command())
-        return f
+        b = tk.Button(parent, text=text, command=command, font=FONT_BUTTON,
+                      bg=color, fg="white", cursor="hand2", relief="flat",
+                      activebackground=PALETTE["accent2"], activeforeground="white",
+                      padx=8, pady=2)
+        b.pack(side=side, padx=padx)
+        return b
 
     def _build_listings_tab(self):
         parent = self._tab_listings
@@ -268,9 +263,24 @@ class AdminUI(tk.Toplevel):
         tk.Label(ctrl_frame, text="Report Type:", font=FONT_LABEL,
                  bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(side="left")
         self._report_var = tk.StringVar(value="bookings")
-        for rt in ["bookings", "revenue", "cancellations", "occupancy"]:
-            ttk.Radiobutton(ctrl_frame, text=rt.capitalize(),
-                            variable=self._report_var, value=rt).pack(side="left", padx=8)
+        
+        report_types = [
+            ("Bookings", "bookings"),
+            ("Revenue", "revenue"),
+            ("Cancellations", "cancellations"),
+            ("Occupancy", "occupancy"),
+            ("Top Film", "top_film"),
+            ("Staff", "staff_bookings")
+        ]
+        for label, val in report_types:
+            ttk.Radiobutton(ctrl_frame, text=label,
+                            variable=self._report_var, value=val).pack(side="left", padx=8)
+
+        # Month filter
+        tk.Label(ctrl_frame, text="Month (YYYY-MM):", font=FONT_LABEL,
+                 bg=PALETTE["bg"], fg=PALETTE["muted"]).pack(side="left", padx=(16, 4))
+        self._month_var = tk.StringVar()
+        ttk.Entry(ctrl_frame, textvariable=self._month_var, width=10).pack(side="left")
 
         self._btn(ctrl_frame, "▶ Generate", self._generate_report, bg="#2ECC71")
         self._btn(ctrl_frame, "💾 Export CSV", self._export_report, bg=PALETTE["accent2"])
@@ -290,7 +300,8 @@ class AdminUI(tk.Toplevel):
 
     def _generate_report(self):
         rtype  = self._report_var.get()
-        report = self._ctrl.generate_report(rtype)
+        month  = self._month_var.get() or None
+        report = self._ctrl.generate_report(rtype, month=month)
         self._last_report = report
         tree   = self._report_tree
 
@@ -387,24 +398,19 @@ class _ListingDialog(tk.Toplevel):
                      bg=PALETTE["bg"], fg=PALETTE["muted"]).grid(
                 row=row, column=0, sticky="w", pady=6)
             
-            if kind == "optionmenu":
-                # tk.OptionMenu is more stable on macOS for dark themes
-                if not var.get() and values: var.set(values[0])
-                om = tk.OptionMenu(inner, var, *values)
-                om.config(font=FONT_INPUT, bg=PALETTE["surface"], 
-                          fg=PALETTE["text"], activebackground=PALETTE["accent2"],
-                          relief="flat", highlightthickness=0)
-                om["menu"].config(bg=PALETTE["surface"], fg=PALETTE["text"])
-                om.grid(row=row, column=1, padx=(12, 0), pady=6, sticky="ew")
+            if kind == "combobox":
+                cb = ttk.Combobox(inner, textvariable=var, values=values,
+                                  state="readonly", font=FONT_INPUT, width=30)
+                cb.grid(row=row, column=1, padx=(12, 0), pady=6, sticky="ew")
             else:
                 ent = ttk.Entry(inner, textvariable=var, font=FONT_INPUT, width=32)
                 ent.grid(row=row, column=1, padx=(12, 0), pady=6, sticky="ew")
 
-        add_row(0, "Film",       self._film_var,   "optionmenu", film_labels)
-        add_row(1, "Screen",     self._screen_var, "optionmenu", screen_labels)
+        add_row(0, "Film",       self._film_var,   "combobox", film_labels)
+        add_row(1, "Screen",     self._screen_var, "combobox", screen_labels)
         add_row(2, "Date (YYYY-MM-DD)", self._date_var, "entry")
         add_row(3, "Time (HH:MM)",     self._time_var, "entry")
-        add_row(4, "Show Type",  self._type_var,   "optionmenu", show_types)
+        add_row(4, "Show Type",  self._type_var,   "combobox", show_types)
 
         self._status = tk.Label(inner, text="", font=FONT_LABEL,
                                 bg=PALETTE["bg"], fg=PALETTE["accent"],
@@ -538,3 +544,4 @@ class _FilmDialog(tk.Toplevel):
             self.destroy()
         except Exception as e:
             self._status.config(text=str(e))
+
