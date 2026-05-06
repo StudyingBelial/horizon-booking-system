@@ -349,20 +349,23 @@ class BookingUI(tk.Toplevel):
 
                 available = seat.seatId in avail_ids
                 bg = base_color if available else "#5A5A5A"
-
-                btn = tk.Button(
+                
+                # Using a Label instead of Button for consistent macOS visibility
+                btn = tk.Label(
                     row_frame,
                     text=seat.seatNumber,
                     font=("Helvetica", 7, "bold"),
                     bg=bg, fg="white",
                     width=5, height=1,
-                    relief="flat", cursor="hand2" if available else "arrow",
-                    state="normal" if available else "disabled",
-                    command=lambda s=seat: self._toggle_seat(s),
+                    cursor="hand2" if available else "arrow"
                 )
                 btn.pack(side="left", padx=1, pady=1)
+                
                 if available:
+                    btn.bind("<Button-1>", lambda e, s=seat: self._toggle_seat(s))
                     self._seat_btns[seat.seatId] = (btn, seat, base_color)
+                else:
+                    btn.config(fg="#888888") # Muted text for booked seats
 
         # Screen label at bottom
         tk.Label(self._seat_inner,
@@ -373,11 +376,12 @@ class BookingUI(tk.Toplevel):
     def _toggle_seat(self, seat):
         if seat.seatId in self._selected:
             self._selected.remove(seat.seatId)
-            _, _, orig_color = self._seat_btns[seat.seatId]
-            self._seat_btns[seat.seatId][0].configure(bg=orig_color)
+            lbl, _, orig_color = self._seat_btns[seat.seatId]
+            lbl.configure(bg=orig_color, fg="white")
         else:
             self._selected.append(seat.seatId)
-            self._seat_btns[seat.seatId][0].configure(bg="#3A6B3A")
+            lbl, _, _ = self._seat_btns[seat.seatId]
+            lbl.configure(bg="#3A6B3A", fg="white")
         self._update_summary()
 
     # ── Price / summary updates ───────────────────────────────────────────────
