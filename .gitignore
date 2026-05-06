@@ -1,4 +1,6 @@
 *.db
+*.db-journal
+*.db-wal
 *.pdf
 *.pyc
 *.pyo
