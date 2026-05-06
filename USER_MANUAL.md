@@ -10,7 +10,7 @@ Welcome to the **Horizon Cinemas Booking System (HCBS)**. This manual provides a
 1.  Launch the application by running `python main.py`.
 2.  On the **Sign In** screen, select your portal (Admin, Manager, or Staff).
 3.  Enter your **Username** and **Password**.
-    *   *Default credentials for testing: admin/admin, manager/manager, staff1/staff1.*
+    *   *Default credentials for testing: admin/admin123, manager/manager123, staff1/staff123, staff2/staff456.*
 4.  Click **SIGN IN**.
 
 ---
