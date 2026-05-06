@@ -53,6 +53,20 @@ class ManagerUI(tk.Toplevel):
             bg=PALETTE["accent"],
             side="right",
         )
+        self._btn(
+            bar,
+            "❌ Cancel Booking",
+            self._open_cancel,
+            bg=PALETTE["accent"],
+            side="right",
+        )
+        self._btn(
+            bar,
+            "🎟 New Booking",
+            self._open_booking,
+            bg=PALETTE["success"],
+            side="right",
+        )
 
         # Custom Logout button
         log_b = tk.Button(
@@ -492,8 +506,15 @@ class ManagerUI(tk.Toplevel):
 
     def _open_admin_view(self):
         from ui.admin_ui import AdminUI
-
         AdminUI(self.master, self.user)
+
+    def _open_booking(self):
+        from ui.booking_ui import BookingUI
+        BookingUI(self.master, self.user)
+
+    def _open_cancel(self):
+        from ui.cancel_ui import CancelUI
+        CancelUI(self.master)
 
     # ── Helper ─────────────────────────────────────────────────────────────────
 

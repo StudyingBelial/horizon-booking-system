@@ -23,6 +23,24 @@ class AdminUI(tk.Toplevel):
         self.title(f"Horizon Cinemas — Admin [{user.username}]")
         self.geometry("1100x740")
         self.configure(bg=PALETTE["bg"])
+        style = ttk.Style(self)
+        style.theme_use("clam")  # needed to allow field background customisation
+        style.configure(
+            "TCombobox",
+            fieldbackground=PALETTE["surface"],
+            background=PALETTE["surface"],
+            foreground=PALETTE["text"],
+            selectbackground=PALETTE["accent2"],
+            selectforeground="white",
+            arrowcolor=PALETTE["text"],
+            )
+        style.map(
+            "TCombobox",
+            fieldbackground=[("readonly", PALETTE["surface"])],
+            foreground=[("readonly", PALETTE["text"])],
+            selectbackground=[("readonly", PALETTE["accent2"])],
+            selectforeground=[("readonly", "white")],
+)
         self._build()
 
     def _build(self):
@@ -114,6 +132,7 @@ class AdminUI(tk.Toplevel):
             tb, "✏️ Edit Selected", self._edit_listing_dialog, bg=PALETTE["accent2"]
         )
         self._btn(tb, "🗑 Delete Selected", self._delete_listing, bg=PALETTE["accent"])
+        self._btn(tb, "🎟 Book Selected", self._book_selected, bg="#F39C12")
         self._btn(
             tb, "🔄 Refresh", self._load_listings, bg=PALETTE["accent2"], side="right"
         )
@@ -186,6 +205,18 @@ class AdminUI(tk.Toplevel):
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
+    def _book_selected(self):
+        sel = self._lst_tree.selection()
+        if not sel:
+            messagebox.showwarning("Select", "Please select a listing first.")
+            return
+        listing_id = int(sel[0])
+        from ui.booking_ui import BookingUI
+        # Pass the LoginUI (master of AdminUI) as the master for BookingUI
+        win = BookingUI(self.master, self.user)
+        # Optionally pre-select the listing if we add that feature to BookingUI
+        # For now, just opening the UI is a huge step.
+
     # ═══════════════════════════════════════════════════════════════════════════
     # BOOKINGS TAB
     # ═══════════════════════════════════════════════════════════════════════════
@@ -195,7 +226,8 @@ class AdminUI(tk.Toplevel):
 
         tb = tk.Frame(parent, bg=PALETTE["bg"])
         tb.pack(fill="x", pady=(8, 4), padx=8)
-        self._btn(tb, "❌ Cancel Selected", self._cancel_selected, bg=PALETTE["accent"])
+        self._btn(tb, "➕ New Booking", self._new_booking, bg="#2ECC71")
+        self._btn(tb, "❌ Cancel Booking", self._open_cancel_dialog, bg=PALETTE["accent"])
         self._btn(
             tb, "🔄 Refresh", self._load_bookings, bg=PALETTE["accent2"], side="right"
         )
@@ -260,6 +292,14 @@ class AdminUI(tk.Toplevel):
             self._load_bookings()
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def _new_booking(self):
+        from ui.booking_ui import BookingUI
+        BookingUI(self.master, self.user)
+
+    def _open_cancel_dialog(self):
+        from ui.cancel_ui import CancelUI
+        CancelUI(self.master)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # FILMS TAB
