@@ -88,3 +88,7 @@ Maintain code standards using the following tools:
 
 ## 👥 Contributors
 Developed as part of the **Advanced Software Development** module.
+* [StudyingBelial](https://github.com/StudyingBelial) : Aarya Bhandari
+* [Shreeya-Sh](https://github.com/Shreeya-Sh) : Shreeya Shakya
+* [ShubhamJB](https://github.com/ShubhamJB) : Shubham Jung Basnet
+* [BardanThapa](https://github.com/BardanThapa) : Bardan Thapa
