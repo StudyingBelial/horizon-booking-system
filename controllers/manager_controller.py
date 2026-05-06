@@ -91,15 +91,16 @@ class ManagerController:
         if existing and existing["c"] > 0:
             raise ValidationError(f"City '{city_name}' already exists.")
 
-        # Insert default pricing for all show types
-        defaults = [
-            (city_name, "Standard", 10.00),
-            (city_name, "IMAX", 14.00),
-            (city_name, "3D", 12.00),
-            (city_name, "Directors", 15.00),
-        ]
+        # Insert default pricing for all show types and time slots
+        defaults = []
+        show_types = ["Standard", "IMAX", "3D", "Directors"]
+        slots = ["Morning", "Afternoon", "Evening"]
+        for st in show_types:
+            for sl in slots:
+                defaults.append((city_name, st, sl, 10.00))
+
         db.executemany(
-            "INSERT INTO pricing_rules(city, showType, basePrice) VALUES (?,?,?)",
+            "INSERT INTO pricing_rules(city, showType, timeSlot, basePrice) VALUES (?,?,?,?)",
             defaults,
         )
         return city_name
@@ -162,12 +163,12 @@ class ManagerController:
 
     # ── Pricing rules ─────────────────────────────────────────────────────────
 
-    def update_pricing(self, city: str, show_type: str, base_price: float) -> bool:
+    def update_pricing(self, city: str, show_type: str, time_slot: str, base_price: float) -> bool:
         if base_price <= 0:
             raise ValidationError("Base price must be greater than zero.")
         db.execute(
-            "UPDATE pricing_rules SET basePrice=? WHERE city=? AND showType=?",
-            (base_price, city, show_type),
+            "UPDATE pricing_rules SET basePrice=? WHERE city=? AND showType=? AND timeSlot=?",
+            (base_price, city, show_type, time_slot),
         )
         return True
 

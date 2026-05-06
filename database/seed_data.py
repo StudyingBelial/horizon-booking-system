@@ -14,27 +14,30 @@ def seed():
     # ── Pricing Rules ────────────────────────────────────────────────────────
     existing = db.fetchone("SELECT COUNT(*) as c FROM pricing_rules")
     if existing["c"] == 0:
-        rules = [
-            # (city, showType, basePrice)
-            ("London", "Standard", 12.00),
-            ("London", "IMAX", 16.00),
-            ("London", "3D", 14.00),
-            ("London", "Directors", 18.00),
-            ("Bristol", "Standard", 10.00),
-            ("Bristol", "IMAX", 14.00),
-            ("Bristol", "3D", 12.00),
-            ("Bristol", "Directors", 15.00),
-            ("Cardiff", "Standard", 9.50),
-            ("Cardiff", "IMAX", 13.00),
-            ("Cardiff", "3D", 11.00),
-            ("Cardiff", "Directors", 14.00),
-            ("Birmingham", "Standard", 7.00),
-            ("Birmingham", "IMAX", 10.00),
-            ("Birmingham", "3D", 9.00),
-            ("Birmingham", "Directors", 11.00),
-        ]
+        rules = []
+        # (city, showType, timeSlot, basePrice)
+        # Standard rules from the requirement image
+        cities_data = {
+            "Birmingham": [5.00,  6.00,  7.00],
+            "Bristol":    [6.00,  7.00,  8.00],
+            "Cardiff":    [5.00,  6.00,  7.00],
+            "London":     [10.00, 11.00, 12.00]
+        }
+        slots = ["Morning", "Afternoon", "Evening"]
+        
+        for city, prices in cities_data.items():
+            for i, slot in enumerate(slots):
+                # Standard
+                rules.append((city, "Standard", slot, prices[i]))
+                # IMAX (+£4)
+                rules.append((city, "IMAX", slot, prices[i] + 4.00))
+                # 3D (+£2)
+                rules.append((city, "3D", slot, prices[i] + 2.00))
+                # Directors (+£5)
+                rules.append((city, "Directors", slot, prices[i] + 5.00))
+
         db.executemany(
-            "INSERT INTO pricing_rules(city, showType, basePrice) VALUES (?,?,?)",
+            "INSERT INTO pricing_rules(city, showType, timeSlot, basePrice) VALUES (?,?,?,?)",
             rules,
         )
 

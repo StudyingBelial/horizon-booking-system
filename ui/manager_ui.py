@@ -356,7 +356,7 @@ class ManagerUI(tk.Toplevel):
             tb, "🔄 Refresh", self._load_pricing, bg=PALETTE["accent2"], side="right"
         )
 
-        cols = ("City", "Show Type", "Base Price", "Upper Gallery", "VIP")
+        cols = ("City", "Show Type", "Time Slot", "Base Price", "Upper Gallery", "VIP")
         self._price_tree = self._make_tree(parent, cols)
         self._load_pricing()
 
@@ -369,10 +369,11 @@ class ManagerUI(tk.Toplevel):
             tree.insert(
                 "",
                 "end",
-                iid=f"{rule.city}|{rule.showType}",
+                iid=f"{rule.city}|{rule.showType}|{rule.timeSlot}",
                 values=(
                     rule.city,
                     rule.showType,
+                    rule.timeSlot,
                     f"£{rule.basePrice:.2f}",
                     f"£{rule.calcUpper():.2f}",
                     f"£{rule.calcVIP():.2f}",
@@ -384,13 +385,13 @@ class ManagerUI(tk.Toplevel):
         if not sel:
             messagebox.showwarning("Select", "Select a pricing rule first.")
             return
-        city, show_type = sel[0].split("|")
+        city, show_type, time_slot = sel[0].split("|")
         _FormDialog(
             self,
-            title=f"Update Price: {city} / {show_type}",
+            title=f"Update Price: {city} / {show_type} / {time_slot}",
             fields=[("New Base Price (£)", "base_price")],
             on_submit=lambda v: self._ctrl.update_pricing(
-                city, show_type, float(v["base_price"])
+                city, show_type, time_slot, float(v["base_price"])
             ),
             on_success=self._load_pricing,
         )
