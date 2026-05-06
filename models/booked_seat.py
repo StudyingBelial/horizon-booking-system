@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/booked_seat.py — BookedSeat domain model.
 """
@@ -50,3 +53,4 @@ class BookedSeat:
     def __repr__(self):
         return (f"<BookedSeat bookingId={self.bookingId} seatId={self.seatId} "
                 f"type={self.ticketType} price=£{self.priceCharged:.2f}>")
+

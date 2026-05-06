@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 config.py — Global configuration for HCBS.
 """
@@ -25,3 +28,4 @@ MAX_ADVANCE_BOOKING_DAYS = 7
 
 # Minimum days before showDate that cancellation is allowed (> 1 day away)
 MIN_CANCEL_DAYS_BEFORE_SHOW = 1
+

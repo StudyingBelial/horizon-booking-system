@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.listing import Listing
@@ -86,3 +89,4 @@ def test_listing_calc_ticket_price(mock_get_screen, mock_rule_get):
 def test_listing_repr():
     listing = Listing(1, 10, 100, "2026-05-10", "14:00", "2D")
     assert repr(listing) == "<Listing id=1 filmId=10 date=2026-05-10 time=14:00>"
+

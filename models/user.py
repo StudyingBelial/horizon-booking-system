@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/user.py — User hierarchy: User (abstract) → BookingStaff, Admin, Manager.
 """
@@ -108,3 +111,4 @@ class Manager(User):
     def accessAdminView(self):
         """Managers inherit full admin capabilities."""
         return True
+

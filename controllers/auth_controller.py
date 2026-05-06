@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 controllers/auth_controller.py — Handles login and session state.
 """
@@ -57,3 +60,4 @@ class AuthController:
                 f"Access denied. Required role(s): {roles}. "
                 f"Your role: {user.role}"
             )
+

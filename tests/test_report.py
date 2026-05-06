@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 import os
 import csv
@@ -71,3 +74,4 @@ def test_export_no_data(tmp_path):
 def test_repr():
     report = Report("test", [{}, {}])
     assert repr(report) == "<Report type=test rows=2>"
+

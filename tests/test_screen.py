@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.screen import Screen
@@ -60,3 +63,4 @@ def test_screen_get_cinema(mock_get_cinema):
 def test_screen_repr():
     screen = Screen(1, 10, 5, 150, 100, 50)
     assert repr(screen) == "<Screen id=1 cinemaId=10 number=5>"
+

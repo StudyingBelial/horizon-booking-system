@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.seat import Seat
@@ -53,3 +56,4 @@ def test_seat_properties():
 def test_seat_repr():
     seat = Seat(1, 1, "A1", SeatType.LOWER_HALL)
     assert repr(seat) == f"<Seat id=1 number=A1 type={SeatType.LOWER_HALL}>"
+

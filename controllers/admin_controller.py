@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 controllers/admin_controller.py — Admin operations: manage listings, reports.
 """
@@ -128,3 +131,4 @@ class AdminController:
 
     def get_summary_stats(self) -> dict:
         return self._reports.get_summary_stats()
+

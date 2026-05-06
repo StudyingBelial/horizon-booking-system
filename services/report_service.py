@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 services/report_service.py — Orchestrates report generation and export.
 """
@@ -7,7 +10,10 @@ from models.report import Report
 
 class ReportService:
 
-    REPORT_TYPES = ["bookings", "revenue", "cancellations", "occupancy"]
+    REPORT_TYPES = [
+        "bookings", "revenue", "cancellations", "occupancy",
+        "top_film", "staff_bookings"
+    ]
 
     def generate(self, report_type: str, **kwargs) -> Report:
         if report_type not in self.REPORT_TYPES:
@@ -52,3 +58,4 @@ class ReportService:
             "total_films":    total_films,
             "total_cinemas":  total_cinemas,
         }
+

@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@2.1.1
+  python: circleci/python@3.0.0
 
 jobs:
   # ── 1. Quality Assurance ──────────────────────────────────────────────────
@@ -12,9 +12,6 @@ jobs:
       - checkout
       - python/install-packages:
           pkg-manager: pip
-      - run:
-          name: Install Quality Tools
-          command: pip install flake8 black bandit
       - run:
           name: Lint with flake8
           command: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -31,13 +28,18 @@ jobs:
       - image: cimg/python:3.10
     steps:
       - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y python3-tk xvfb
       - python/install-packages:
           pkg-manager: pip
       - run:
           name: Run Pytest with Coverage
           command: |
-            pip install pytest-cov
-            pytest --cov=. --cov-report=xml --cov-report=term-missing
+            mkdir -p test-results
+            xvfb-run pytest tests -ra -q --ignore=test_results.txt --cov=. --cov-report=xml --cov-report=term-missing --junitxml=test-results/junit.xml
       - store_artifacts:
           path: coverage.xml
       - store_test_results:
@@ -56,9 +58,6 @@ jobs:
             sudo apt-get install -y python3-tk binutils
       - python/install-packages:
           pkg-manager: pip
-      - run:
-          name: Install PyInstaller
-          command: pip install pyinstaller
       - run:
           name: Build Executable
           command: |

@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/report.py — Report domain model.
 """
@@ -32,6 +35,10 @@ class Report:
             return Report._cancellations_report(**kwargs)
         elif report_type == "occupancy":
             return Report._occupancy_report(**kwargs)
+        elif report_type == "top_film":
+            return Report._top_film_report(**kwargs)
+        elif report_type == "staff_bookings":
+            return Report._staff_bookings_report(**kwargs)
         else:
             raise ValueError(f"Unknown report type: {report_type}")
 
@@ -56,8 +63,8 @@ class Report:
 
     @staticmethod
     def _revenue_report(**kwargs) -> "Report":
-        rows = db.fetchall(
-            """
+        month = kwargs.get("month")  # e.g. "2024-05"
+        query = """
             SELECT c.city, c.name as cinema, SUM(b.totalCost) as total_revenue,
                    COUNT(b.bookingId) as num_bookings
             FROM bookings b
@@ -65,11 +72,54 @@ class Report:
             JOIN screens s  ON l.screenId  = s.screenId
             JOIN cinemas c  ON s.cinemaId  = c.cinemaId
             WHERE b.status = 'Confirmed'
-            GROUP BY c.cinemaId
-            ORDER BY total_revenue DESC
-            """
-        )
+        """
+        params = []
+        if month:
+            query += " AND b.bookingDate LIKE ?"
+            params.append(f"{month}%")
+
+        query += " GROUP BY c.cinemaId ORDER BY total_revenue DESC"
+        rows = db.fetchall(query, tuple(params))
         return Report("revenue", [dict(r) for r in rows])
+
+    @staticmethod
+    def _top_film_report(**kwargs) -> "Report":
+        month = kwargs.get("month")
+        query = """
+            SELECT f.title as film, SUM(b.totalCost) as total_revenue,
+                   COUNT(b.bookingId) as num_bookings
+            FROM bookings b
+            JOIN listings l ON b.listingId = l.listingId
+            JOIN films f    ON l.filmId    = f.filmId
+            WHERE b.status = 'Confirmed'
+        """
+        params = []
+        if month:
+            query += " AND b.bookingDate LIKE ?"
+            params.append(f"{month}%")
+        
+        query += " GROUP BY f.filmId ORDER BY total_revenue DESC"
+        rows = db.fetchall(query, tuple(params))
+        return Report("top_film", [dict(r) for r in rows])
+
+    @staticmethod
+    def _staff_bookings_report(**kwargs) -> "Report":
+        month = kwargs.get("month")
+        query = """
+            SELECT u.username, COUNT(b.bookingId) as num_bookings,
+                   SUM(b.totalCost) as total_value
+            FROM bookings b
+            JOIN users u ON b.staffId = u.userId
+            WHERE b.status = 'Confirmed'
+        """
+        params = []
+        if month:
+            query += " AND b.bookingDate LIKE ?"
+            params.append(f"{month}%")
+
+        query += " GROUP BY u.userId ORDER BY num_bookings DESC"
+        rows = db.fetchall(query, tuple(params))
+        return Report("staff_bookings", [dict(r) for r in rows])
 
     @staticmethod
     def _cancellations_report(**kwargs) -> "Report":
@@ -128,3 +178,4 @@ class Report:
 
     def __repr__(self):
         return f"<Report type={self.report_type} rows={len(self.data)}>"
+

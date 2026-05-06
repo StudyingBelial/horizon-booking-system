@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import patch, MagicMock
 from controllers.auth_controller import AuthController
@@ -76,3 +79,4 @@ def test_require_role_success():
     
     # Should not raise any exception
     AuthController.require_role("Admin", "Manager")
+

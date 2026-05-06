@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import patch, MagicMock
 from models.user import User, BookingStaff, Admin, Manager
@@ -178,3 +181,4 @@ def test_manager_manage_staff(mock_manage):
     
     assert res is True
     mock_manage.assert_called_once_with("remove", user_id=10)
+

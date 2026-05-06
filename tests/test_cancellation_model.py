@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import MagicMock, patch
 from models.cancellation import Cancellation
@@ -32,3 +35,4 @@ def test_cancellation_calc_refund_static():
 def test_cancellation_repr():
     c = Cancellation(1, "REF1", "2026-05-10", 12.5, 0.5)
     assert repr(c) == "<Cancellation ref=REF1 refund=£12.50 date=2026-05-10>"
+

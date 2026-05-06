@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/screen.py — Screen domain model.
 """
@@ -69,3 +72,4 @@ class Screen:
     def __repr__(self):
         return (f"<Screen id={self.screenId} cinemaId={self.cinemaId} "
                 f"number={self.screenNumber}>")
+

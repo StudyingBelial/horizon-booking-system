@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 controllers/manager_controller.py — Manager operations: cinemas, cities, staff.
 """
@@ -174,3 +177,4 @@ class ManagerController:
 
     def get_summary_stats(self) -> dict:
         return self._reports.get_summary_stats()
+

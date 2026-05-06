@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 utils/constants.py — Shared enumerations and string constants for HCBS.
 """
@@ -39,3 +42,4 @@ class AgeRating(str, Enum):
 
 # Ticket types used in booked_seats
 TICKET_TYPES = [SeatType.LOWER_HALL, SeatType.UPPER_GALLERY, SeatType.VIP]
+

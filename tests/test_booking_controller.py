@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import patch, MagicMock
 from controllers.booking_controller import BookingController
@@ -75,3 +78,4 @@ def test_get_available_seats(mock_listing, booking_controller):
     
     seats = booking_controller.get_available_seats(1)
     assert seats == ["Seat1", "Seat2"]
+

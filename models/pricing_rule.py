@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 """
 models/pricing_rule.py — PricingRule domain model.
 """
@@ -60,3 +63,4 @@ class PricingRule:
     def __repr__(self):
         return (f"<PricingRule city={self.city} showType={self.showType} "
                 f"base=£{self.basePrice:.2f}>")
+

@@ -7,6 +7,9 @@ on:
       - 'v*'
   pull_request:
     branches: [ "main", "develop" ]
+ 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ── 1. Quality Assurance ──────────────────────────────────────────────────
@@ -22,9 +25,10 @@ jobs:
           python-version: "3.10"
           cache: 'pip'
 
-      - name: Install Linting Tools
+      - name: Install dependencies
         run: |
-          pip install flake8 black bandit
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Lint with flake8 (Syntax & logic)
         run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -51,13 +55,14 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest-cov
 
       - name: Run tests with Coverage
         run: |
-          pytest --cov=. --cov-report=xml --cov-report=term-missing
+          xvfb-run pytest tests -ra -q --ignore=test_results.txt --cov=. --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
@@ -89,7 +94,7 @@ jobs:
 
       - name: Install Build Tools
         run: |
-          pip install pyinstaller
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Build Binary (Windows)

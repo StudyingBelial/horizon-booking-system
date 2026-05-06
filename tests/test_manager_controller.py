@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import patch, MagicMock
 from controllers.manager_controller import ManagerController
@@ -92,3 +95,4 @@ def test_generate_seats_logic(mock_db, manager_controller):
     assert args[1][10] == (1, "E1", "Upper")
     # Check first VIP seat
     assert args[1][20] == (1, "VIP-01", "VIP")
+

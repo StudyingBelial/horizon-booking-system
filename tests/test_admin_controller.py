@@ -1,3 +1,6 @@
+# Author: StudyingBelial | Student ID: 1234567
+# Module: UFCF8S-30-2 Advanced Software Development
+
 import pytest
 from unittest.mock import patch, MagicMock
 from controllers.admin_controller import AdminController
@@ -79,3 +82,4 @@ def test_generate_report(mock_init, admin_controller):
     
     admin_controller.generate_report("occupancy")
     admin_controller._reports.generate.assert_called_once_with("occupancy")
+
