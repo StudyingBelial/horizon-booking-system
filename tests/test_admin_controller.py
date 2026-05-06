@@ -37,9 +37,14 @@ def test_add_listing_success(
     mock_db.execute.assert_called_once()
 
 
+@patch("services.validation_service.ValidationService.validate_city_cinema_count")
+@patch("models.cinema.Cinema.get_by_id")
+@patch("models.screen.Screen.get_by_id")
 @patch("models.film.Film.get_by_id")
-def test_add_listing_film_not_found(mock_film_get, admin_controller):
+def test_add_listing_film_not_found(mock_film_get, mock_screen_get, mock_cinema_get, mock_validate_count, admin_controller):
     mock_film_get.return_value = None
+    mock_screen_get.return_value = MagicMock(cinemaId=1)
+    mock_cinema_get.return_value = MagicMock(city="London")
     with pytest.raises(ValidationError, match="Film ID 1 not found."):
         admin_controller.add_listing(1, 1, "2026-05-10", "20:00", "Standard")
 

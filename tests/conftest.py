@@ -26,6 +26,27 @@ def pytest_configure(config):
         # Store file handle in config to close it properly at the end
         config._test_results_file = f
 
+@pytest.fixture(scope="session", autouse=True)
+def init_test_db():
+    """
+    Ensures all tests run against an in-memory database with the schema initialized.
+    This prevents 'no such table' errors in fresh environments like CI.
+    """
+    from database.db_manager import db
+    import sqlite3
+    
+    # Force in-memory connection
+    db._instance._connection = sqlite3.connect(":memory:", check_same_thread=False)
+    db._connection.row_factory = sqlite3.Row
+    db._connection.execute("PRAGMA foreign_keys = ON")
+    
+    # Initialize schema
+    db.init_schema()
+    
+    yield
+    
+    db.close()
+
 def pytest_unconfigure(config):
     """
     Clean up by closing the file handle.
