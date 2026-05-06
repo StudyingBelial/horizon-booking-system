@@ -8,6 +8,7 @@ Managers inherit all Admin capabilities plus system configuration.
 
 import tkinter as tk
 from tkinter import ttk, messagebox
+from services.validation_service import ValidationError
 from controllers.manager_controller import ManagerController
 from controllers.admin_controller import AdminController
 from ui.login_ui import PALETTE, FONT_LABEL, FONT_BUTTON, FONT_INPUT
@@ -207,18 +208,26 @@ class ManagerUI(tk.Toplevel):
         )
 
     def _add_screen_dialog(self):
+        sel = self._cinema_tree.selection()
+        try:
+            cinema_id = self._validation.validate_cinema_selected(
+                self._cinema_tree.item(sel[0], "values")[0] if sel else None
+            )
+        except ValidationError as e:
+            messagebox.showwarning("Select Cinema", str(e))
+            return
+
         _FormDialog(
             self,
             title="Add Screen to Cinema",
             fields=[
-                ("Cinema ID", "cinema_id"),
                 ("Screen Number", "screen_number"),
                 ("Total Capacity", "total_capacity"),
                 ("Lower Hall Seats", "lower_seats"),
                 ("Upper Gallery Seats", "upper_seats"),
             ],
             on_submit=lambda v: self._ctrl.add_screen(
-                int(v["cinema_id"]),
+                cinema_id,
                 int(v["screen_number"]),
                 int(v["total_capacity"]),
                 int(v["lower_seats"]),
@@ -254,11 +263,20 @@ class ManagerUI(tk.Toplevel):
         for city in cities:
             prices = {}
             for st in ["Standard", "IMAX", "3D", "Directors"]:
+                # Fetch min and max basePrice for this city/showType across all slots
                 row = db.fetchone(
-                    "SELECT basePrice FROM pricing_rules WHERE city=? AND showType=?",
+                    """SELECT MIN(basePrice) as minP, MAX(basePrice) as maxP 
+                       FROM pricing_rules WHERE city=? AND showType=?""",
                     (city, st),
                 )
-                prices[st] = f"£{row['basePrice']:.2f}" if row else "N/A"
+                if row and row["minP"] is not None:
+                    if row["minP"] == row["maxP"]:
+                        prices[st] = f"£{row['minP']:.2f}"
+                    else:
+                        prices[st] = f"£{row['minP']:.0f}-£{row['maxP']:.0f}"
+                else:
+                    prices[st] = "N/A"
+            
             tree.insert(
                 "",
                 "end",
@@ -451,23 +469,26 @@ class ManagerUI(tk.Toplevel):
         self._report_tree.pack(fill="both", expand=True, padx=(8, 0), pady=4)
 
     def _generate_report(self):
-        rtype = self._report_var.get()
-        month = self._month_var.get() or None
-        report = self._admin.generate_report(rtype, month=month)
-        tree = self._report_tree
+        try:
+            rtype = self._report_var.get()
+            month = self._month_var.get() or None
+            report = self._admin.generate_report(rtype, month=month)
+            tree = self._report_tree
 
-        if not report.data:
-            messagebox.showinfo("Empty", "No data for this report.")
-            return
+            if not report.data:
+                messagebox.showinfo("Empty", "No data for this report.")
+                return
 
-        cols = list(report.data[0].keys())
-        tree["columns"] = cols
-        for col in cols:
-            tree.heading(col, text=col.replace("_", " ").title())
-            tree.column(col, width=130, minwidth=80)
-        tree.delete(*tree.get_children())
-        for row in report.data:
-            tree.insert("", "end", values=list(row.values()))
+            cols = list(report.data[0].keys())
+            tree["columns"] = cols
+            for col in cols:
+                tree.heading(col, text=col.replace("_", " ").title())
+                tree.column(col, width=130, minwidth=80)
+            tree.delete(*tree.get_children())
+            for row in report.data:
+                tree.insert("", "end", values=list(row.values()))
+        except Exception as e:
+            messagebox.showerror("Report Error", f"Failed to generate report: {str(e)}")
 
     def _open_admin_view(self):
         from ui.admin_ui import AdminUI

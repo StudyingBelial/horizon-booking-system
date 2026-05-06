@@ -94,6 +94,8 @@ class ValidationService:
         self, film_id, screen_id, show_date: str, show_time: str, show_type: str
     ) -> None:
         from utils.constants import ShowType
+        from models.screen import Screen
+        from models.cinema import Cinema
 
         self.validate_booking_date(show_date)
         if not show_time or len(show_time) != 5:
@@ -101,5 +103,31 @@ class ValidationService:
         valid_types = [st.value for st in ShowType]
         if show_type not in valid_types:
             raise ValidationError(f"Show type must be one of: {', '.join(valid_types)}")
+        
         if not film_id or not screen_id:
             raise ValidationError("Film and Screen must be selected.")
+        
+        # Check cinema count for the city
+        screen = Screen.get_by_id(screen_id)
+        if screen:
+            cinema = Cinema.get_by_id(screen.cinemaId)
+            if cinema:
+                self.validate_city_cinema_count(cinema.city)
+
+    def validate_city_cinema_count(self, city: str) -> None:
+        """Requirement: Each city has at least two cinemas."""
+        from database.db_manager import db
+        row = db.fetchone("SELECT COUNT(*) as c FROM cinemas WHERE city=?", (city,))
+        if row and row["c"] < 2:
+            raise ValidationError(
+                f"City '{city}' only has {row['c']} cinema(s). "
+                "The system requires at least two cinemas per city to operate."
+            )
+
+    def validate_cinema_selected(self, cinema_id: any) -> int:
+        if not cinema_id:
+            raise ValidationError("Please select a cinema from the list first.")
+        try:
+            return int(cinema_id)
+        except ValueError:
+            raise ValidationError("Invalid cinema selection.")

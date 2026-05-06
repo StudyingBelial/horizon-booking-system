@@ -76,12 +76,18 @@ class Listing:
     def calcTicketPrice(self, seat_type: str) -> float:
         """Calculate price for a seat type using the city's pricing rule."""
         from models.pricing_rule import PricingRule
+        from services.pricing_service import PricingService
 
         screen = self.getScreen()
         cinema = screen.getCinema() if screen else None
         if not cinema:
             return 0.0
-        rule = PricingRule.get(cinema.city, self.showType)
+        
+        # Determine time slot from showTime
+        pricing_svc = PricingService()
+        time_slot = pricing_svc._get_time_slot(self.showTime)
+        
+        rule = PricingRule.get(cinema.city, self.showType, time_slot)
         return rule.getPrice(seat_type) if rule else 0.0
 
     def __repr__(self):
