@@ -29,35 +29,35 @@ class TestPricingRule(unittest.TestCase):
         seed()
 
     def test_lower_hall_price_equals_base(self):
-        rule = PricingRule.get("London", "Standard")
+        rule = PricingRule.get("London", "Standard", "Morning")
         self.assertIsNotNone(rule)
         self.assertAlmostEqual(rule.getPrice("Lower"), rule.basePrice, places=2)
 
     def test_upper_gallery_premium_20_percent(self):
-        rule = PricingRule.get("London", "Standard")
+        rule = PricingRule.get("London", "Standard", "Morning")
         expected = round(rule.basePrice * UPPER_GALLERY_PREMIUM, 2)
         self.assertAlmostEqual(rule.getPrice("Upper"), expected, places=2)
 
     def test_vip_premium_44_percent(self):
-        rule = PricingRule.get("London", "Standard")
+        rule = PricingRule.get("London", "Standard", "Morning")
         expected = round(rule.basePrice * VIP_PREMIUM, 2)
         self.assertAlmostEqual(rule.getPrice("VIP"), expected, places=2)
 
     def test_vip_equals_upper_times_1_2(self):
         """VIP = base × 1.2 × 1.2 = Upper × 1.2"""
-        rule = PricingRule.get("London", "Standard")
+        rule = PricingRule.get("London", "Standard", "Morning")
         upper = rule.calcUpper()
         vip = rule.calcVIP()
         self.assertAlmostEqual(vip, round(upper * 1.20, 2), places=2)
 
     def test_imax_higher_than_standard(self):
-        std = PricingRule.get("London", "Standard")
-        imax = PricingRule.get("London", "IMAX")
+        std = PricingRule.get("London", "Standard", "Morning")
+        imax = PricingRule.get("London", "IMAX", "Morning")
         self.assertGreater(imax.basePrice, std.basePrice)
 
     def test_bristol_cheaper_than_london(self):
-        london = PricingRule.get("London", "Standard")
-        bristol = PricingRule.get("Bristol", "Standard")
+        london = PricingRule.get("London", "Standard", "Morning")
+        bristol = PricingRule.get("Bristol", "Standard", "Morning")
         self.assertGreater(london.basePrice, bristol.basePrice)
 
     def test_pricing_service_breakdown(self):

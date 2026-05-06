@@ -9,15 +9,24 @@ def admin_controller():
     return AdminController()
 
 
+@patch("services.validation_service.ValidationService.validate_city_cinema_count")
 @patch("controllers.admin_controller.db")
 @patch("models.film.Film.get_by_id")
 @patch("models.screen.Screen.get_by_id")
+@patch("models.cinema.Cinema.get_by_id")
 @patch("models.listing.Listing.get_by_id")
 def test_add_listing_success(
-    mock_listing_get, mock_screen_get, mock_film_get, mock_db, admin_controller
+    mock_listing_get,
+    mock_cinema_get,
+    mock_screen_get,
+    mock_film_get,
+    mock_db,
+    mock_validate_count,
+    admin_controller,
 ):
     mock_film_get.return_value = MagicMock()
-    mock_screen_get.return_value = MagicMock()
+    mock_screen_get.return_value = MagicMock(cinemaId=1)
+    mock_cinema_get.return_value = MagicMock()
     mock_db.last_insert_id.return_value = 1
     mock_listing_get.return_value = MagicMock(listingId=1)
 

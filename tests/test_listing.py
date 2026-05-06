@@ -103,7 +103,7 @@ def test_listing_calc_ticket_price(mock_get_screen, mock_rule_get):
     price = listing.calcTicketPrice("VIP")
 
     assert price == 15.0
-    mock_rule_get.assert_called_once_with("London", "2D")
+    mock_rule_get.assert_called_once_with("London", "2D", "Afternoon")
     mock_rule.getPrice.assert_called_once_with("VIP")
 
 

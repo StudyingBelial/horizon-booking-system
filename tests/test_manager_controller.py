@@ -79,7 +79,7 @@ def test_manage_staff_remove(mock_db, manager_controller):
 
 @patch("controllers.manager_controller.db")
 def test_update_pricing_success(mock_db, manager_controller):
-    result = manager_controller.update_pricing("London", "IMAX", 15.5)
+    result = manager_controller.update_pricing("London", "IMAX", "Morning", 15.5)
 
     assert result is True
     mock_db.execute.assert_called_once()
@@ -87,7 +87,7 @@ def test_update_pricing_success(mock_db, manager_controller):
 
 def test_update_pricing_invalid(manager_controller):
     with pytest.raises(ValidationError, match="Base price must be greater than zero."):
-        manager_controller.update_pricing("London", "IMAX", -1)
+        manager_controller.update_pricing("London", "IMAX", "Morning", -1)
 
 
 @patch("controllers.manager_controller.db")
