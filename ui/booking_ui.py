@@ -63,6 +63,20 @@ class BookingUI(tk.Toplevel):
         self._build_selection_panel(left)
         self._build_seat_panel(right)
 
+    def _btn(self, parent, text, command, bg=None, side="top", pady=2):
+        """Helper to create custom Frame+Label buttons for macOS consistency."""
+        color = bg if bg else PALETTE["accent"]
+        f = tk.Frame(parent, bg=color, padx=0, pady=0)
+        f.pack(side=side, fill="x", pady=pady)
+        l = tk.Label(f, text=text, font=FONT_BUTTON,
+                     bg=color, fg="white", padx=12, pady=10,
+                     cursor="hand2")
+        l.pack(fill="x")
+        l.bind("<Enter>", lambda e: l.config(bg=PALETTE["accent2"]))
+        l.bind("<Leave>", lambda e: l.config(bg=color))
+        l.bind("<Button-1>", lambda e: command())
+        return f
+
     def _build_selection_panel(self, parent):
         """Left panel: film, cinema, listing selection + price info."""
         def section(text):
@@ -80,7 +94,7 @@ class BookingUI(tk.Toplevel):
         # ── Film picker ───────────────────────────────────────────────────────
         f1 = section("① Select Film")
         tk.Label(f1, text="Film:", font=FONT_LABEL,
-                 bg=PALETTE["surface"], fg=PALETTE["muted"]).grid(row=0, col=0, sticky="w")
+                 bg=PALETTE["surface"], fg=PALETTE["muted"]).grid(row=0, column=0, sticky="w")
         self._film_var = tk.StringVar()
         self._film_cb  = ttk.Combobox(f1, textvariable=self._film_var,
                                       state="readonly", font=FONT_INPUT, width=34)
@@ -140,19 +154,8 @@ class BookingUI(tk.Toplevel):
         btn_frame = tk.Frame(parent, bg=PALETTE["bg"])
         btn_frame.pack(fill="x", pady=(4, 0))
 
-        tk.Button(btn_frame, text="✅  Confirm Booking",
-                  font=FONT_BUTTON,
-                  bg=PALETTE["success"], fg="white",
-                  activebackground="#27AE60", relief="flat",
-                  cursor="hand2", command=self._confirm_booking,
-                  pady=8).pack(fill="x", pady=(0, 4))
-
-        tk.Button(btn_frame, text="❌  Cancel Booking",
-                  font=FONT_BUTTON,
-                  bg=PALETTE["accent"], fg="white",
-                  activebackground="#C0392B", relief="flat",
-                  cursor="hand2", command=self._open_cancel,
-                  pady=6).pack(fill="x")
+        self._btn(btn_frame, "✅  Confirm Booking", self._confirm_booking, bg=PALETTE["success"])
+        self._btn(btn_frame, "❌  Cancel Booking", self._open_cancel, bg=PALETTE["accent"])
 
     def _build_seat_panel(self, parent):
         """Right panel: seat grid visualisation."""
