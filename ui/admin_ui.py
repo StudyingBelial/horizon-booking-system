@@ -352,8 +352,15 @@ class _ListingDialog(tk.Toplevel):
         self._mode       = mode
         self._listing_id = listing_id
         self._on_success = on_success
+
+        # Initialize variables before building UI
+        self._film_var   = tk.StringVar()
+        self._screen_var = tk.StringVar()
+        self._date_var   = tk.StringVar()
+        self._time_var   = tk.StringVar()
+        self._type_var   = tk.StringVar()
+
         self.title("Add Listing" if mode == "add" else "Edit Listing")
-        self.geometry("440px x 400px".replace("px", "").replace(" ", ""))
         self.geometry("440x400")
         self.resizable(False, False)
         self.configure(bg=PALETTE["bg"])
@@ -365,13 +372,6 @@ class _ListingDialog(tk.Toplevel):
         inner = tk.Frame(self, bg=PALETTE["bg"])
         inner.pack(padx=24, pady=20, fill="both", expand=True)
 
-        fields = [
-            ("Film",       "_film_var",   "combobox"),
-            ("Screen",     "_screen_var", "combobox"),
-            ("Date (YYYY-MM-DD)", "_date_var", "entry"),
-            ("Time (HH:MM)",     "_time_var", "entry"),
-            ("Show Type",  "_type_var",   "combobox"),
-        ]
         self._films   = self._ctrl.get_all_films()
         self._screens = self._ctrl.get_all_screens()
 
@@ -382,33 +382,38 @@ class _ListingDialog(tk.Toplevel):
         ]
         show_types = ["Standard", "IMAX", "3D", "Directors"]
 
-        for i, (label, attr, kind) in enumerate(fields):
+        def add_row(row, label, var, kind, values=None):
             tk.Label(inner, text=label, font=FONT_LABEL,
                      bg=PALETTE["bg"], fg=PALETTE["muted"]).grid(
-                row=i, column=0, sticky="w", pady=6)
-            var = tk.StringVar()
-            setattr(self, attr, var)
-            if kind == "combobox":
-                values = (film_labels   if "film" in attr else
-                          screen_labels if "screen" in attr else
-                          show_types)
-                cb = ttk.Combobox(inner, textvariable=var,
-                                  values=values, state="readonly",
-                                  font=FONT_INPUT, width=30)
-                cb.grid(row=i, column=1, padx=(12, 0), pady=6, sticky="ew")
+                row=row, column=0, sticky="w", pady=6)
+            
+            if kind == "optionmenu":
+                # tk.OptionMenu is more stable on macOS for dark themes
+                if not var.get() and values: var.set(values[0])
+                om = tk.OptionMenu(inner, var, *values)
+                om.config(font=FONT_INPUT, bg=PALETTE["surface"], 
+                          fg=PALETTE["text"], activebackground=PALETTE["accent2"],
+                          relief="flat", highlightthickness=0)
+                om["menu"].config(bg=PALETTE["surface"], fg=PALETTE["text"])
+                om.grid(row=row, column=1, padx=(12, 0), pady=6, sticky="ew")
             else:
-                ttk.Entry(inner, textvariable=var,
-                          font=FONT_INPUT, width=32).grid(
-                    row=i, column=1, padx=(12, 0), pady=6, sticky="ew")
+                ent = ttk.Entry(inner, textvariable=var, font=FONT_INPUT, width=32)
+                ent.grid(row=row, column=1, padx=(12, 0), pady=6, sticky="ew")
+
+        add_row(0, "Film",       self._film_var,   "optionmenu", film_labels)
+        add_row(1, "Screen",     self._screen_var, "optionmenu", screen_labels)
+        add_row(2, "Date (YYYY-MM-DD)", self._date_var, "entry")
+        add_row(3, "Time (HH:MM)",     self._time_var, "entry")
+        add_row(4, "Show Type",  self._type_var,   "optionmenu", show_types)
 
         self._status = tk.Label(inner, text="", font=FONT_LABEL,
                                 bg=PALETTE["bg"], fg=PALETTE["accent"],
                                 wraplength=380)
-        self._status.grid(row=len(fields), column=0, columnspan=2, pady=(8, 0))
+        self._status.grid(row=5, column=0, columnspan=2, pady=(8, 0))
 
         # Custom Save button
         btn_f = tk.Frame(inner, bg=PALETTE["success"])
-        btn_f.grid(row=len(fields)+1, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+        btn_f.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(12, 0))
         btn = tk.Label(btn_f, text="SAVE", font=FONT_BUTTON, bg=PALETTE["success"],
                       fg="white", cursor="hand2", pady=10)
         btn.pack(fill="x")
