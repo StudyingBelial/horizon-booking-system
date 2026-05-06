@@ -1,6 +1,3 @@
-# Author: StudyingBelial | Student ID: 1234567
-# Module: UFCF8S-30-2 Advanced Software Development
-
 """
 controllers/booking_controller.py — Orchestrates the full booking and
 cancellation sequence flows.
